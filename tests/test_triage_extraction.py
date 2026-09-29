@@ -52,3 +52,25 @@ def test_extraction_for_complaints():
 def test_no_extraction_for_prospecting():
     with pytest.raises(ValueError):
         extract_info(FakeClient([]), make_email(), Category.PROSPECTING, "X")
+
+
+def test_triage_system_has_general_rules():
+    from agent_emails.pipeline.triage import TRIAGE_SYSTEM
+    assert "Règles de départage" in TRIAGE_SYSTEM
+    assert "basse" in TRIAGE_SYSTEM and "prospection" in TRIAGE_SYSTEM
+    assert "français" in TRIAGE_SYSTEM
+
+
+def test_triage_system_replaces_company_placeholder():
+    from agent_emails.pipeline.triage import TRIAGE_SYSTEM
+    company = "Foo {bar} SAS"
+    formatted = TRIAGE_SYSTEM.format(company=company)
+    assert "Foo {bar} SAS" in formatted
+    assert "{company}" not in formatted
+
+
+def test_extraction_system_has_no_leftover_placeholders():
+    from agent_emails.pipeline.extraction import EXTRACTION_SYSTEM
+    formatted = EXTRACTION_SYSTEM.format(company="Test", category="demande_devis")
+    assert "{company}" not in formatted
+    assert "{category}" not in formatted

@@ -15,13 +15,20 @@ Catégories :
 - information : question générale (horaires, catalogue, délais, garantie, candidature…).
 - prospection : sollicitation commerciale non demandée, publicité, newsletter.
 
-Urgence :
-- haute : client mécontent, relance, panne ou délai de moins d'une semaine, relance de paiement.
-- normale : demande à traiter dans les jours qui viennent.
-- basse : information générale, prospection.
+Règles de départage :
+- choisis l'intention principale de l'email;
+- toute demande mentionnant un prix, une quantité ou un devis est demande_devis, même si elle est formulée comme une question générale;
+- une proposition commerciale d'un expéditeur inconnu qui offre un produit ou service à {company} est prospection, même si elle adopte un ton familier ou prétend faire référence à un échange antérieur qui ne figure pas dans l'email;
+- un client confirmant un paiement est information.
 
-confidence : ta confiance dans la catégorie, entre 0 et 1 ; baisse-la si l'email est ambigu.
-explanation : une phrase. summary : moins de 15 mots, en français."""
+Urgence :
+- haute : impact sur l'activité, délai dans les 7 jours, ou relance répétée (jugée sur les faits, pas le ton : un email poli peut être haute).
+- normale : demande à traiter dans les jours qui viennent.
+- basse : prospection est toujours basse.
+
+confidence : ta confiance dans la catégorie, entre 0 et 1 ; mets-la sous 0,7 si deux catégories sont plausibles.
+
+Langue : l'email peut être dans n'importe quelle langue ; explanation et summary sont toujours rédigés en français."""
 
 
 def triage_email(client, email: Email, company: str, model: str = TRIAGE_MODEL) -> tuple[Triage, Usage]:
