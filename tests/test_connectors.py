@@ -53,3 +53,24 @@ def test_draft_filename_is_safe_and_stable():
     name = draft_filename("<../../etc/passwd@x>")
     assert name == draft_filename("<../../etc/passwd@x>")
     assert "/" not in name and name.endswith(".eml")
+
+
+def test_unreadable_files_are_reported_not_fatal(tmp_path):
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "01_valid.eml").write_bytes(build_eml(message_id="<valid@x.fr>", subject="Valid"))
+    (inbox / "bad.eml").mkdir()  # Directory pretending to be .eml file
+    result = FolderSource(inbox, tmp_path / "drafts").fetch_new(set())
+    assert [e.subject for e in result.emails] == ["Valid"]
+    assert [name for name, _ in result.errors] == ["bad.eml"]
+    assert "Fichier illisible" in result.errors[0][1]
+
+
+def test_duplicate_message_ids_in_single_fetch_return_only_one(tmp_path):
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "01_first.eml").write_bytes(build_eml(message_id="<same@x.fr>", subject="First"))
+    (inbox / "02_second.eml").write_bytes(build_eml(message_id="<same@x.fr>", subject="Second"))
+    result = FolderSource(inbox, tmp_path / "drafts").fetch_new(set())
+    assert len(result.emails) == 1
+    assert result.emails[0].subject == "First"

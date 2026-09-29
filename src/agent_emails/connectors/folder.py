@@ -22,14 +22,19 @@ class FolderSource:
         result = FetchResult()
         if not self.inbox.is_dir():
             return result
+        seen_ids = set(known_ids)
         for path in sorted(self.inbox.glob("*.eml")):
             try:
                 email = parse_eml(path.read_bytes())
             except EmailParseError as exc:
                 result.errors.append((path.name, str(exc)))
                 continue
-            if email.message_id not in known_ids:
+            except OSError as exc:
+                result.errors.append((path.name, f"Fichier illisible : {exc.strerror or exc}"))
+                continue
+            if email.message_id not in seen_ids:
                 result.emails.append(email)
+                seen_ids.add(email.message_id)
         return result
 
     def save_draft(self, email: Email, text: str) -> str:
