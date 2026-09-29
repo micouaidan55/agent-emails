@@ -128,3 +128,31 @@ def test_generated_attachment_names_have_extension():
     names = [a.filename for a in email.attachments]
     assert any(n.endswith(".pdf") for n in names)
     assert any(n.endswith(".png") for n in names)
+
+
+def test_empty_attachments_are_preserved():
+    """Empty attachments should still be present in the email."""
+    email = parse_eml(build_eml(attachments=(("empty.pdf", "application/pdf", b""),)))
+    assert len(email.attachments) == 1
+    assert email.attachments[0].filename == "empty.pdf"
+    assert email.attachments[0].data == b""
+    assert email.attachments[0].content_type == "application/pdf"
+
+
+def test_anonymous_pdfs_get_distinct_pdf_names():
+    """Two anonymous PDF attachments should get distinct names both ending in .pdf."""
+    email = parse_eml(
+        build_eml(
+            attachments=(
+                ("", "application/pdf", b"%PDF-1.4 first"),
+                ("", "application/pdf", b"%PDF-1.4 second"),
+            )
+        )
+    )
+    assert len(email.attachments) == 2
+    names = [a.filename for a in email.attachments]
+    assert len(set(names)) == 2  # Names are unique
+    assert all(n.endswith(".pdf") for n in names)  # Both end in .pdf
+    # Should be piece_jointe_0.pdf and piece_jointe_1.pdf
+    assert names[0].endswith(".pdf")
+    assert names[1].endswith(".pdf")

@@ -128,15 +128,14 @@ def parse_eml(raw: bytes) -> Email:
             else:
                 data = part.get_payload(decode=True) or b""
 
-            if data:  # Only add non-empty attachments
-                filename = _attachment_name(part, idx, used_names)
-                attachments.append(
-                    Attachment(
-                        filename=filename,
-                        content_type=part.get_content_type(),
-                        data=data,
-                    )
+            filename = _attachment_name(part, idx, used_names)
+            attachments.append(
+                Attachment(
+                    filename=filename,
+                    content_type=part.get_content_type(),
+                    data=data,
                 )
+            )
 
         return Email(
             message_id=message_id,
