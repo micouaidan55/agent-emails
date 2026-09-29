@@ -1,10 +1,19 @@
 """Modèles de données de l'agent de tri des emails."""
 
+import re
 from datetime import datetime
 from enum import StrEnum
 
 from agent_factures.extraction.models import Issue
 from pydantic import BaseModel, Field
+
+
+_DELIMITERS = re.compile(r"<(/?)(email|analyse|brouillon)\b", re.IGNORECASE)
+
+
+def neutralize(text: str) -> str:
+    """Empêche un contenu non fiable de fermer ou d'ouvrir nos balises de délimitation."""
+    return _DELIMITERS.sub(r"‹\1\2", text)
 
 
 class Category(StrEnum):
@@ -138,13 +147,13 @@ class EmailResult(BaseModel):
 
 def render_email(email: Email) -> str:
     """Email présenté au modèle. Les balises <email> marquent un contenu non fiable."""
-    attachments = ", ".join(a.filename for a in email.attachments) or "aucune"
+    attachments = ", ".join(neutralize(a.filename) for a in email.attachments) or "aucune"
     return (
         "<email>\n"
-        f"De : {email.sender_name} <{email.sender_address}>\n"
+        f"De : {neutralize(email.sender_name)} <{neutralize(email.sender_address)}>\n"
         f"Date : {email.received_at:%d/%m/%Y %H:%M}\n"
-        f"Objet : {email.subject}\n"
+        f"Objet : {neutralize(email.subject)}\n"
         f"Pièces jointes : {attachments}\n\n"
-        f"{email.body.strip()}\n"
+        f"{neutralize(email.body.strip())}\n"
         "</email>"
     )
