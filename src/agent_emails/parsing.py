@@ -1,6 +1,7 @@
 """Lecture d'un fichier .eml en Email."""
 
 import hashlib
+import mimetypes
 from datetime import datetime, timezone
 from email import policy
 from email.parser import BytesParser
@@ -15,7 +16,13 @@ class EmailParseError(ValueError):
 
 
 class _TextExtractor(HTMLParser):
-    BLOCK_TAGS = {"p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "table"}
+    BLOCK_TAGS = {
+        "p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6",
+        "table", "hr", "blockquote", "ul", "ol", "pre", "section", "article",
+        "header", "footer"
+    }
+    CELL_TAGS = {"td", "th"}
+    SKIP_TAGS = {"script", "style", "title", "head"}
 
     def __init__(self):
         super().__init__()
@@ -23,14 +30,18 @@ class _TextExtractor(HTMLParser):
         self._skip = 0
 
     def handle_starttag(self, tag, attrs):
-        if tag in ("script", "style"):
+        if tag in self.SKIP_TAGS:
             self._skip += 1
+        elif tag in self.CELL_TAGS:
+            self.parts.append(" ")
         elif tag in self.BLOCK_TAGS:
             self.parts.append("\n")
 
     def handle_endtag(self, tag):
-        if tag in ("script", "style"):
+        if tag in self.SKIP_TAGS:
             self._skip = max(0, self._skip - 1)
+        elif tag in self.CELL_TAGS:
+            self.parts.append(" ")
         elif tag in self.BLOCK_TAGS:
             self.parts.append("\n")
 
@@ -61,6 +72,36 @@ def _received_at(value) -> datetime:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
+def _attachment_name(part, index: int, used: set[str]) -> str:
+    """Generate a unique attachment name."""
+    filename = part.get_filename()
+    if filename:
+        name = filename
+    else:
+        ext = mimetypes.guess_extension(part.get_content_type()) or ""
+        name = f"piece_jointe_{index}{ext}"
+
+    if name not in used:
+        used.add(name)
+        return name
+
+    # Name is used; insert _2, _3, etc. before extension
+    if "." in name:
+        base, ext = name.rsplit(".", 1)
+        ext = "." + ext
+    else:
+        base = name
+        ext = ""
+
+    counter = 2
+    while True:
+        new_name = f"{base}_{counter}{ext}"
+        if new_name not in used:
+            used.add(new_name)
+            return new_name
+        counter += 1
+
+
 def parse_eml(raw: bytes) -> Email:
     try:
         msg = BytesParser(policy=policy.default).parsebytes(raw)
@@ -71,16 +112,32 @@ def parse_eml(raw: bytes) -> Email:
         body_part = msg.get_body(preferencelist=("plain", "html"))
         body = ""
         if body_part is not None:
-            content = body_part.get_content()
+            try:
+                content = body_part.get_content()
+            except LookupError:
+                # Unknown charset; fallback to UTF-8 with error replacement
+                payload = body_part.get_payload(decode=True) or b""
+                content = payload.decode("utf-8", errors="replace")
             body = html_to_text(content) if body_part.get_content_type() == "text/html" else content
-        attachments = [
-            Attachment(
-                filename=part.get_filename() or "piece_jointe",
-                content_type=part.get_content_type(),
-                data=part.get_payload(decode=True) or b"",
-            )
-            for part in msg.iter_attachments()
-        ]
+
+        used_names: set[str] = set()
+        attachments: list[Attachment] = []
+        for idx, part in enumerate(msg.iter_attachments()):
+            if part.get_content_type() == "message/rfc822":
+                data = part.get_payload(0).as_bytes()
+            else:
+                data = part.get_payload(decode=True) or b""
+
+            if data:  # Only add non-empty attachments
+                filename = _attachment_name(part, idx, used_names)
+                attachments.append(
+                    Attachment(
+                        filename=filename,
+                        content_type=part.get_content_type(),
+                        data=data,
+                    )
+                )
+
         return Email(
             message_id=message_id,
             sender_name=name,
