@@ -71,13 +71,38 @@ class EmailStore:
 
     def save_result(self, result: EmailResult) -> None:
         email, triage = result.email, result.triage
+        # Normalize received_at to UTC
+        received_at_utc = email.received_at.astimezone(timezone.utc).isoformat()
+        
+        # Fix 1: Use conditional UPDATE to preserve decided emails
         self._conn.execute(
-            "INSERT OR REPLACE INTO emails (message_id, sender_name, sender_address, subject, received_at, body,"
+            "INSERT INTO emails (message_id, sender_name, sender_address, subject, received_at, body,"
             " attachments, status, category, urgency, confidence, explanation, summary, extraction, invoice_checks,"
-            " draft, draft_original, error, cost_usd, seconds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " draft, draft_original, error, cost_usd, seconds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            " ON CONFLICT(message_id) DO UPDATE SET"
+            " sender_name = excluded.sender_name,"
+            " sender_address = excluded.sender_address,"
+            " subject = excluded.subject,"
+            " received_at = excluded.received_at,"
+            " body = excluded.body,"
+            " attachments = excluded.attachments,"
+            " status = excluded.status,"
+            " category = excluded.category,"
+            " urgency = excluded.urgency,"
+            " confidence = excluded.confidence,"
+            " explanation = excluded.explanation,"
+            " summary = excluded.summary,"
+            " extraction = excluded.extraction,"
+            " invoice_checks = excluded.invoice_checks,"
+            " draft = excluded.draft,"
+            " draft_original = excluded.draft_original,"
+            " error = excluded.error,"
+            " cost_usd = excluded.cost_usd,"
+            " seconds = excluded.seconds"
+            " WHERE emails.status NOT IN ('valide', 'ignore')",
             (
                 email.message_id, email.sender_name, email.sender_address, email.subject,
-                email.received_at.isoformat(), email.body,
+                received_at_utc, email.body,
                 json.dumps([a.filename for a in email.attachments], ensure_ascii=False),
                 result.status.value,
                 triage.category.value if triage else None,
@@ -130,7 +155,25 @@ class EmailStore:
     def correct(self, message_id: str, field: str, new_value: str) -> None:
         if field not in CORRECTABLE_FIELDS:
             raise ValueError(f"Champ non corrigeable : {field}")
+        
+        # Fix 4: Check if message_id exists
         row = self._conn.execute(f"SELECT {field} FROM emails WHERE message_id = ?", (message_id,)).fetchone()
+        if row is None:
+            raise ValueError(f"Email non trouvé : {message_id}")
+        
+        # Fix 3: Validate enum values
+        if field == "category":
+            try:
+                Category(new_value)
+            except ValueError:
+                raise ValueError(f"Catégorie invalide : {new_value}")
+        elif field == "urgency":
+            try:
+                Urgency(new_value)
+            except ValueError:
+                raise ValueError(f"Urgence invalide : {new_value}")
+        
+        # Only now insert and update
         self._conn.execute(
             "INSERT INTO corrections (message_id, field, old_value, new_value) VALUES (?, ?, ?, ?)",
             (message_id, field, row[field] if row else None, new_value),
@@ -162,6 +205,8 @@ class EmailStore:
         mean_cost = self._conn.execute(
             "SELECT AVG(cost_usd) FROM emails WHERE status != 'erreur' OR category IS NOT NULL"
         ).fetchone()[0]
+        # Fix 2: Only count distinct message_ids with category corrections
+        corrected = self._conn.execute("SELECT COUNT(DISTINCT message_id) FROM corrections WHERE field = 'category'").fetchone()[0]
         return Stats(
             total=count(""),
             by_category=by_category,
@@ -171,7 +216,7 @@ class EmailStore:
             validated=count("WHERE status = 'valide'"),
             validated_unchanged=count("WHERE status = 'valide' AND draft IS draft_original"),
             ignored=count("WHERE status = 'ignore'"),
-            corrected=self._conn.execute("SELECT COUNT(DISTINCT message_id) FROM corrections").fetchone()[0],
+            corrected=corrected,
             mean_cost_usd=mean_cost or 0.0,
         )
 
