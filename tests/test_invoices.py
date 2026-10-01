@@ -48,7 +48,7 @@ def test_supported_attachments_are_written_and_analyzed(tmp_path):
     assert (check.filename, check.status) == ("TN-960.pdf", "anomalie")
     assert check.issues[0].code == "TOTAL_INCOHERENT"
     assert check.invoice["number"] == "TN-960"
-    assert check.path == str(written)
+    assert check.path == str(written.resolve())
     assert check.cost_usd == 0.03
 
 

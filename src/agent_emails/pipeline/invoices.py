@@ -38,13 +38,13 @@ def check_invoices(email: Email, analyzer: InvoiceAnalyzer, workdir: Path) -> li
             path.write_bytes(attachment.data)
             result = analyzer.process(path)
         except Exception as exc:
-            checks.append(InvoiceCheck(filename=name, path=str(path), status="a_revoir",
+            checks.append(InvoiceCheck(filename=name, path=str(path.resolve()), status="a_revoir",
                                        explanation=f"Analyse de la facture impossible : {exc}"))
             continue
         checks.append(
             InvoiceCheck(
                 filename=name,
-                path=str(path),
+                path=str(path.resolve()),
                 status=result.verdict.status.value,
                 explanation=result.verdict.explanation,
                 issues=list(result.issues),
