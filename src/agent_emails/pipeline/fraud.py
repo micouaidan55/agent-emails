@@ -29,7 +29,7 @@ _ORGANISATION = re.compile(
 _HOMOGLYPHS = str.maketrans({"0": "o", "1": "l", "i": "l", "3": "e", "5": "s", "4": "a", "7": "t", "8": "b"})
 _URL_IN_TEXT = re.compile(r"(?:https?://|www\.)([a-z0-9.-]+\.[a-z]{2,})", re.IGNORECASE)
 _EMAIL_IN_TEXT = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
-_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,3})?\b")
+_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}(?: ?[A-Z0-9]{1,3})?\b", re.IGNORECASE)
 _BANK_CHANGE = re.compile(
     r"nouve(?:au|lles?)\s+(?:rib|iban|coordonnées\s+bancaires|compte\s+bancaire)"
     r"|changement\s+de\s+(?:rib|banque|coordonnées\s+bancaires|compte\s+bancaire)"
@@ -137,7 +137,7 @@ def fraud_signals(email: Email, known: KnownSenders) -> list[FraudSignal]:
                                        f"Un lien affiche {shown_domain} mais mène à {host}."))
 
     reply_domain = domain_of(email.reply_to)
-    if reply_domain and reply_domain != sender_domain:
+    if reply_domain and not (_same_or_sub(reply_domain, sender_domain) or _same_or_sub(sender_domain, reply_domain)):
         signals.append(_signal("reponse_ailleurs", FraudSeverity.WEAK,
                                f"Les réponses partiraient vers {email.reply_to}, pas vers {email.sender_address}."))
 

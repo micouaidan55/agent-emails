@@ -75,8 +75,9 @@ def test_reply_to_another_domain_is_weak():
     assert [(s.code, s.severity) for s in signals] == [("reponse_ailleurs", FraudSeverity.WEAK)]
 
 
-def test_reply_to_same_domain_is_fine():
-    assert codes(make_email(reply_to="compta@hotel-canuts.fr")) == []
+@pytest.mark.parametrize("reply_to", ["compta@hotel-canuts.fr", "compta@mail.hotel-canuts.fr", "Compta@HOTEL-CANUTS.FR"])
+def test_reply_to_same_domain_or_subdomain_is_fine(reply_to):
+    assert codes(make_email(reply_to=reply_to)) == []
 
 
 def test_display_name_with_another_address_is_weak():
@@ -102,6 +103,7 @@ def test_trusted_free_mail_address_is_fine():
     "Merci d'utiliser désormais notre nouveau RIB pour vos règlements.",
     "Règlement par virement : IBAN FR76 3000 6000 0112 3456 7890 189",
     "Please note our new bank details.",
+    "iban : fr76 3000 6000 0112 3456 7890 189",
 ])
 def test_bank_details_are_weak(body):
     assert codes(make_email(body=body)) == ["coordonnees_bancaires"]
