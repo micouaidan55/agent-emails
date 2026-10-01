@@ -5,7 +5,7 @@ import mimetypes
 from datetime import datetime, timezone
 from email import policy
 from email.parser import BytesParser
-from email.utils import parseaddr, parsedate_to_datetime
+from email.utils import getaddresses, parseaddr, parsedate_to_datetime
 from html.parser import HTMLParser
 
 from agent_emails.models import Attachment, Email, Link
@@ -29,14 +29,25 @@ class _TextExtractor(HTMLParser):
         self.parts: list[str] = []
         self._skip = 0
         self.links: list[Link] = []
-        self._href: str | None = None
-        self._anchor: list[str] = []
+        self._href_stack: list[tuple[str | None, list[str]]] = []
+
+    def _flush_link(self):
+        """Append the pending link (if any) and reset."""
+        if self._href_stack:
+            href, anchor = self._href_stack[-1]
+            if href is not None:
+                self.links.append(Link(text=" ".join("".join(anchor).split()), url=href))
+            self._href_stack.pop()
 
     def handle_starttag(self, tag, attrs):
         if tag == "a":
             href = (dict(attrs).get("href") or "").strip()
-            self._href = href if href and not href.startswith("#") else None
-            self._anchor = []
+            href = href if href and not href.startswith("#") else None
+            self._href_stack.append((href, []))
+        elif tag == "img" and self._href_stack:
+            alt = (dict(attrs).get("alt") or "").strip()
+            if alt:
+                self._href_stack[-1][1].append(alt)
         elif tag in self.SKIP_TAGS:
             self._skip += 1
         elif tag in self.CELL_TAGS:
@@ -45,9 +56,8 @@ class _TextExtractor(HTMLParser):
             self.parts.append("\n")
 
     def handle_endtag(self, tag):
-        if tag == "a" and self._href is not None:
-            self.links.append(Link(text=" ".join("".join(self._anchor).split()), url=self._href))
-            self._href = None
+        if tag == "a":
+            self._flush_link()
         elif tag in self.SKIP_TAGS:
             self._skip = max(0, self._skip - 1)
         elif tag in self.CELL_TAGS:
@@ -58,8 +68,14 @@ class _TextExtractor(HTMLParser):
     def handle_data(self, data):
         if not self._skip:
             self.parts.append(data)
-            if self._href is not None:
-                self._anchor.append(data)
+            # Append data to all active anchors
+            for i in range(len(self._href_stack)):
+                self._href_stack[i][1].append(data)
+
+    def close(self):
+        super().close()
+        while self._href_stack:
+            self._flush_link()
 
 
 def html_to_text(html: str) -> str:
@@ -146,7 +162,12 @@ def parse_eml(raw: bytes) -> Email:
                 links = extract_links(html_part.get_content())
             except LookupError:
                 links = []
-        reply_to = parseaddr(str(msg["Reply-To"] or ""))[1]
+        reply_to = ""
+        reply_to_addresses = getaddresses([str(msg["Reply-To"] or "")])
+        for _name, addr in reply_to_addresses:
+            if addr:
+                reply_to = addr
+                break
 
         used_names: set[str] = set()
         attachments: list[Attachment] = []

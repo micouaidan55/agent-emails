@@ -183,3 +183,29 @@ def test_links_are_read_from_the_html_alternative():
 
 def test_plain_text_email_has_no_links():
     assert parse_eml(build_eml()).links == []
+
+
+def test_unclosed_anchor_is_kept():
+    html = '<p><a href="http://example.fr">Unclosed anchor'
+    email = parse_eml(build_eml(body=None, html=html))
+    assert [(link.text, link.url) for link in email.links] == [("Unclosed anchor", "http://example.fr")]
+
+
+def test_nested_anchors_keep_both_hrefs():
+    html = '<a href="http://outer.fr">Outer <a href="http://inner.fr">Inner</a> text</a>'
+    email = parse_eml(build_eml(body=None, html=html))
+    # Should have both outer and inner links
+    links = [(link.text, link.url) for link in email.links]
+    assert ("Inner", "http://inner.fr") in links
+    assert ("Outer Inner text", "http://outer.fr") in links
+
+
+def test_image_only_link_uses_alt_text():
+    html = '<a href="http://example.fr"><img alt="Click here" src="image.png"/></a>'
+    email = parse_eml(build_eml(body=None, html=html))
+    assert [(link.text, link.url) for link in email.links] == [("Click here", "http://example.fr")]
+
+
+def test_reply_to_with_multiple_addresses_uses_first():
+    email = parse_eml(build_eml(reply_to="a@b.fr, c@d.fr"))
+    assert email.reply_to == "a@b.fr"
