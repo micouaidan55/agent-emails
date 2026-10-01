@@ -17,7 +17,40 @@ Une PME reçoit chaque jour des demandes de devis, des réclamations, des factur
 
 Évaluation sur 48 emails générés : 42 emails légitimes (devis, réclamations, factures dont 6 avec PDF, rendez-vous, informations, prospections) et 6 fraudes (2 changements de RIB dont un sans signal technique fort, un faux président, un hameçonnage, une fausse facture d'annuaire, un domaine sosie d'un client). Pièges : réclamation polie mais urgente, devis déguisé en question, prospection qui imite un client, emails en anglais et en HTML, facture annoncée sans pièce jointe, artisan qui écrit depuis Gmail, fournisseur habituel qui mentionne son IBAN.
 
-Les résultats chiffrés seront publiés ici après le premier run d'évaluation. Pour reproduire (payant, plafonné) : `uv run python -m evals.run --max-cost 2`.
+## Résultats mesurés
+
+Configuration retenue : Claude Haiku 4.5 pour le tri et l'extraction, Claude Sonnet 5 pour les brouillons.
+
+| Métrique | Résultat | Objectif |
+|---|---|---|
+| Tri correct | 97,6 % | ≥ 90 % |
+| Urgence correcte | 90,5 % | ≥ 85 % |
+| Champs extraits corrects | 92,8 % | ≥ 90 % |
+| Note moyenne des brouillons (juge Sonnet, grille ci-dessous) | 4,41 / 5 | ≥ 4 |
+| Informations inventées dans les brouillons | 0 | 0 |
+| Verdicts de factures corrects (agent-factures) | 100 % (6/6) | — |
+| Fraudes détectées | 100 % (6/6) | 100 % |
+| Fausses alertes de fraude (sur 42 emails légitimes) | 1 | ≤ 1 |
+| Coût moyen par email | 0,011 $ | ≤ 0,02 $ |
+| Temps moyen par email | 7,2 s | — |
+
+Quatre fraudes sur six sont bloquées par les seuls contrôles du code. Les deux autres (un changement de RIB écrit depuis la vraie adresse d'un fournisseur, une fausse facture d'annuaire) ne présentent qu'un signal faible : c'est le jugement du modèle qui les arrête. La seule fausse alerte est une prospection qui feint un échange antérieur et demande de « répondre OUI pour valider votre nouveau contrat ». La seule erreur de tri est un fournisseur étranger qui propose un rendez-vous pour présenter sa collection, classé en prospection.
+
+### Expérience coût/qualité : Haiku ou Sonnet pour trier ?
+
+Même jeu, même modèle de rédaction, seul le modèle de tri et d'extraction change :
+
+| | Haiku 4.5 | Sonnet 5 |
+|---|---|---|
+| Tri correct | 97,6 % | 97,6 % |
+| Urgence correcte | 90,5 % | 92,9 % |
+| Champs extraits corrects | 92,8 % | 95,7 % |
+| Fraudes détectées / fausses alertes | 6/6 · 1 | 6/6 · 0 |
+| Coût moyen par email | 0,011 $ | 0,015 $ (+45 %) |
+
+Sonnet gagne quelques points sur l'urgence et l'extraction, mais ne trie pas mieux, pour un coût supérieur de 45 %. Haiku atteint tous les objectifs : il reste le choix par défaut, et le modèle se change d'un paramètre si un client privilégie la précision.
+
+Résultats détaillés, email par email : `evals/results/`. Pour reproduire (payant, environ 0,70 $ par run, plafonné) : `uv run python -m evals.run --max-cost 2` ; variante Sonnet : `uv run python -m evals.run --triage-model claude-sonnet-5 --extraction-model claude-sonnet-5 --no-judge --max-cost 1.5`.
 
 ## Démarrage rapide
 

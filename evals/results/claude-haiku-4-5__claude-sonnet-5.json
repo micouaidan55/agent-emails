@@ -1,0 +1,1321 @@
+[
+  {
+    "file": "01_devis_suspensions.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Martin,\n\nNous vous remercions pour votre message et l'intérêt porté à l'Atelier Lumière SAS pour la rénovation du hall de l'Hôtel des Canuts.\n\nNous avons bien noté votre demande concernant la fourniture et la pose de 12 suspensions en laiton, avec une livraison et installation souhaitées avant le 15 novembre.\n\nAfin d'établir un devis précis, nous allons étudier votre demande et revenir vers vous avec une proposition détaillée (tarifs, délais de fabrication et de pose) [à compléter]. Si vous disposez déjà de références de modèles, de dimensions souhaitées ou de photos du hall, n'hésitez pas à nous les transmettre, cela nous permettra d'affiner notre proposition.\n\nNous restons à votre disposition pour tout complément d'information et vous remercions de votre confiance.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Claire Martin",
+        "company": "Hôtel des Canuts"
+      },
+      "product_or_service": "12 suspensions en laiton, pose comprise",
+      "quantity": "12",
+      "desired_date": "avant le 15 novembre",
+      "budget": null
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "La complétude pourrait être améliorée en proposant un créneau ou délai concret pour le retour du devis plutôt que de rester vague, mais l'absence d'informations inventées est bien respectée."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009232,
+    "secondes": 13.78790754196234
+  },
+  {
+    "file": "02_devis_restaurant.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Roche,\n\nNous vous remercions pour votre message et pour l'intérêt que vous portez à Atelier Lumière SAS à l'occasion de l'ouverture de votre second restaurant.\n\nNous avons bien noté votre projet d'éclairage complet pour une salle d'environ 80 m², avec une ouverture prévue en janvier et un budget indicatif d'environ 6 000 €.\n\nAfin de vous proposer un chiffrage adapté, pourriez-vous nous transmettre quelques précisions complémentaires : plan ou photos du lieu, hauteur sous plafond, ambiance souhaitée (chaleureuse, moderne, intense, tamisée, etc.) et toute contrainte particulière (prises existantes, type de plafond, etc.) ?\n\nDès réception de ces éléments, nous reviendrons vers vous avec une proposition détaillée et un devis pour [à compléter].\n\nNous restons à votre disposition pour toute question.\n\nBien cordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Julien Roche",
+        "company": "Bistrot Saint-Paul"
+      },
+      "product_or_service": "éclairage complet de la salle",
+      "quantity": "environ 80 m²",
+      "desired_date": "janvier",
+      "budget": "environ 6 000 €"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 4,
+      "commentaire": "La formulation finale 'un devis pour [à compléter]' est maladroite et semble être un reliquat de template mal complété, mais aucune information n'est inventée."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009849,
+    "secondes": 8.441251749871299
+  },
+  {
+    "file": "03_devis_question.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Leroy,\n\nNous vous remercions pour votre message et l'intérêt que vous portez à nos créations.\n\nNous réalisons en effet des luminaires sur mesure, et des appliques fines pour escalier correspondent tout à fait à ce que nous proposons. Afin de pouvoir vous établir un devis précis pour vos 3 appliques, il serait utile de connaître quelques détails supplémentaires : dimensions souhaitées, style ou matériaux envisagés, ainsi que toute contrainte particulière liée à votre escalier.\n\nConcernant le prix, celui-ci dépendra de ces éléments et vous sera communiqué [à compléter] une fois votre projet précisé.\n\nN'hésitez pas à nous transmettre ces informations, ou éventuellement des photos de l'espace concerné, afin que nous puissions vous accompagner au mieux.\n\nDans l'attente de votre retour, nous restons à votre disposition pour toute question.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Sophie Leroy",
+        "company": null
+      },
+      "product_or_service": "lampes sur mesure pour un escalier",
+      "quantity": "3 appliques",
+      "desired_date": null,
+      "budget": null
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon ne propose pas de délai ou de prochaine étape concrète (ex: créneau d'appel), se contentant de demander des informations supplémentaires sans structurer la suite du processus."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009374,
+    "secondes": 8.069049957906827
+  },
+  {
+    "file": "04_devis_urgent.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "haute",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Petit,\n\nNous vous remercions pour votre message et comprenons l'urgence de votre situation à l'approche de l'ouverture de votre exposition le 8 octobre.\n\nNous avons bien noté votre besoin de remplacement de votre éclairage sur rail ainsi que votre souhait de recevoir un devis cette semaine. Afin de pouvoir établir une proposition adaptée, pourriez-vous nous indiquer quelques précisions complémentaires (dimensions de l'espace à équiper, nombre de points lumineux souhaités, type de rail existant) ? Cela nous permettra de vous proposer la solution la plus adaptée à vos contraintes.\n\nNous transmettons dès à présent votre demande à notre équipe technique afin de vous faire parvenir un devis dans les meilleurs délais, en tenant compte de l'urgence de votre dossier. Le délai précis de livraison et d'installation vous sera communiqué dans le devis [à compléter].\n\nNous restons à votre disposition pour tout échange complémentaire.\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Marc Petit",
+        "company": "Galerie Nova"
+      },
+      "product_or_service": "éclairage sur rail",
+      "quantity": null,
+      "desired_date": "cette semaine",
+      "budget": null
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est globalement excellent mais ne propose pas de créneau de contact direct ou de numéro de téléphone pour accélérer l'échange vu l'urgence signalée."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.00981,
+    "secondes": 8.59674633317627
+  },
+  {
+    "file": "05_devis_bureaux.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Madame Benali,\n\nNous vous remercions de votre message et de l'intérêt que vous portez à Atelier Lumière SAS.\n\nNous avons bien noté votre souhait de remplacer les éclairages de vos 6 bureaux par des lampes LED. Afin de vous établir un devis précis, pourriez-vous nous préciser quelques éléments complémentaires, notamment la superficie approximative des bureaux, le type d'éclairage actuellement en place et vos éventuelles préférences (intensité, température de couleur, luminaires encastrés ou suspendus, etc.) ?\n\nDès réception de ces informations, nous reviendrons vers vous avec une proposition adaptée, incluant [à compléter] comme délai de réalisation.\n\nNous restons à votre disposition pour tout complément d'information.\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Nadia Benali",
+        "company": "Cabinet Benali Avocats"
+      },
+      "product_or_service": "lampes LED",
+      "quantity": "6 bureaux",
+      "desired_date": null,
+      "budget": null
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est pertinent et fidèle, mais la formulation 'incluant [à compléter] comme délai de réalisation' est un peu maladroite syntaxiquement, nuisant légèrement à la complétude perçue."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008763,
+    "secondes": 7.3685780831146985
+  },
+  {
+    "file": "06_devis_anglais.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Dear Tom,\n\nThank you for reaching out regarding your hotel project in Lyon.\n\nWe would be happy to prepare a quote for 20 custom wall lights, with delivery planned for December.\n\nTo help us put together an accurate proposal, could you kindly provide a few more details about the desired design, materials, and finish you have in mind, as well as any technical specifications or references you may already have?\n\nAs soon as we receive this information, we will get back to you with a detailed quote. Please note that pricing and lead times will be confirmed at that stage [à compléter].\n\nLooking forward to hearing from you.\n\nBest regards,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Tom Walsh",
+        "company": "Dublin Design Studio"
+      },
+      "product_or_service": "custom wall lights",
+      "quantity": "20",
+      "desired_date": "December",
+      "budget": null
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "La formulation 'pricing and lead times will be confirmed at that stage [à compléter]' est un peu maladroite stylistiquement, mélangeant une phrase complète avec un marqueur de placeholder, mais le contenu reste fidèle et complet."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.007896,
+    "secondes": 6.552218666067347
+  },
+  {
+    "file": "07_devis_html.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Garnier,\n\nNous vous remercions de l'intérêt que vous portez à l'Atelier Lumière SAS.\n\nNous avons bien noté votre souhait d'obtenir un devis pour 2 lampadaires design destinés à votre salon. Afin de pouvoir vous proposer une sélection adaptée et établir un devis précis, pourriez-vous nous préciser vos préférences en termes de style, de dimensions, de budget envisagé et de délai souhaité ?\n\nDès réception de ces précisions, nous reviendrons vers vous avec une proposition personnalisée. Le prix et le délai exacts restent [à compléter] à ce stade.\n\nNous restons à votre disposition pour tout complément d'information.\n\nBien cordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Élodie Garnier",
+        "company": null
+      },
+      "product_or_service": "lampadaires design",
+      "quantity": "2",
+      "desired_date": null,
+      "budget": null
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est complet et fidèle, mais il pourrait proposer un créneau d'échange ou un catalogue pour rendre la suite encore plus claire."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008326,
+    "secondes": 6.549242791021243
+  },
+  {
+    "file": "08_devis_relance.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "haute",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Faure,\n\nNous vous prions de nous excuser pour ce délai de réponse qui n'est pas à la hauteur de ce que nous souhaitons offrir à nos clients.\n\nNous avons bien noté votre demande concernant l'éclairage de la vitrine de la Boulangerie Faure. Afin de vous établir un devis adapté, pourriez-vous nous préciser, si ce n'est déjà fait, les dimensions de la vitrine ainsi que vos attentes en termes d'ambiance lumineuse ?\n\nNous reviendrons vers vous avec une proposition dans les meilleurs délais [à compléter].\n\nNous restons à votre disposition pour toute question complémentaire.\n\nCordialement,\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Pierre Faure",
+        "company": "Boulangerie Faure"
+      },
+      "product_or_service": "éclairage de vitrine",
+      "quantity": null,
+      "desired_date": null,
+      "budget": null
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 4,
+      "commentaire": "La mention '[à compléter]' insérée après 'meilleurs délais' est maladroite et peu professionnelle à l'oral du message, mais le reste est fidèle et ne surenchérit pas sur les engagements."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008848,
+    "secondes": 8.164531040936708
+  },
+  {
+    "file": "09_recl_casse.eml",
+    "attendu": "reclamation",
+    "obtenu": "reclamation",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "haute",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Simon,\n\nNous vous remercions pour votre message et sommes sincèrement désolés d'apprendre que l'abat-jour de votre commande CMD-2291 soit arrivé cassé. Nous comprenons votre déception et vous prions de bien vouloir nous en excuser.\n\nAfin de traiter votre demande de remplacement dans les meilleurs délais, pourriez-vous nous transmettre une photo de l'abat-jour endommagé ainsi que de l'emballage reçu ? Cela nous permettra d'identifier l'origine du problème et d'accélérer la prise en charge de votre dossier.\n\nDès réception de ces éléments, nous reviendrons vers vous avec une solution concrète concernant le remplacement, dans un délai de [à compléter].\n\nNous vous remercions de votre compréhension et restons à votre disposition pour toute question complémentaire.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Laura Simon",
+        "company": null
+      },
+      "order_reference": "CMD-2291",
+      "problem": "l'abat-jour de la lampe est cassé",
+      "expectation": "un remplacement au plus vite"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est pertinent, fidèle et bien construit, mais le délai de réponse n'est pas précisé et reste marqué [à compléter], ce qui limite légèrement la complétude."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009115999999999999,
+    "secondes": 11.06783170811832
+  },
+  {
+    "file": "10_recl_polie_urgente.eml",
+    "attendu": "reclamation",
+    "obtenu": "reclamation",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "haute",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Blanc,\n\nNous vous remercions de nous avoir signalé ce problème et vous prions de nous excuser pour la gêne occasionnée par ces appliques qui clignotent depuis hier soir, d'autant plus à l'approche de votre service de 80 couverts demain midi.\n\nNous comprenons l'urgence de la situation et allons faire le nécessaire pour qu'une intervention soit organisée le plus rapidement possible, [à compléter] (date et heure de passage de notre technicien).\n\nPourriez-vous nous confirmer vos disponibilités sur place afin que nous puissions coordonner au mieux cette intervention ?\n\nNous restons à votre entière disposition pour toute information complémentaire.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Henri Blanc",
+        "company": "Restaurant Le Gourmet"
+      },
+      "order_reference": null,
+      "problem": "les appliques installées la semaine dernière clignotent depuis hier soir",
+      "expectation": "Pourriez-vous passer ?"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon ne propose pas de créneau concret ni d'engagement de passage avant le service du lendemain, ce qui laisse l'urgence du client sans réponse claire malgré le marquage correct des inconnues."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008773,
+    "secondes": 7.835300415987149
+  },
+  {
+    "file": "11_recl_retard.eml",
+    "attendu": "reclamation",
+    "obtenu": "reclamation",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "haute",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Morel,\n\nNous vous prions de nous excuser pour ce désagrément concernant votre commande CMD-2305, qui devait vous être livrée le 20 septembre et que vous n'avez toujours pas reçue. Nous comprenons votre mécontentement, d'autant plus qu'il s'agit d'une situation déjà rencontrée par le passé, et nous en sommes sincèrement désolés.\n\nNous allons vérifier sans délai l'état de votre livraison auprès de notre service logistique afin de vous apporter des précisions sur son acheminement. Nous reviendrons vers vous avec une mise à jour précise dans les meilleurs délais : [à compléter].\n\nN'hésitez pas à nous indiquer si vous disposez d'éléments complémentaires (numéro de suivi, etc.) qui pourraient nous aider à accélérer les recherches.\n\nNous vous remercions de votre patience et de votre compréhension.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Isabelle Morel",
+        "company": null
+      },
+      "order_reference": "CMD-2305",
+      "problem": "Ma commande CMD-2305 devait être livrée le 20 septembre et je n'ai rien reçu. Je suis vraiment mécontente, c'est la deuxième fois.",
+      "expectation": null
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "La complétude est limitée car, malgré la mention explicite d'une deuxième incident par la cliente, le brouillon ne propose aucun geste commercial ou compensation ni de délai concret, se contentant d'un vague [à compléter]."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009855,
+    "secondes": 8.629402667051181
+  },
+  {
+    "file": "12_recl_facture.eml",
+    "attendu": "reclamation",
+    "obtenu": "reclamation",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Girard,\n\nNous vous remercions pour votre message et vous prions de nous excuser pour la gêne occasionnée par cette erreur sur la facture AL-2026-083.\n\nNous avons bien noté l'écart signalé : 22 lampes de chevet facturées contre 20 effectivement reçues. Nous allons vérifier ce point avec notre service logistique afin de confirmer la quantité réellement livrée et procéder, le cas échéant, à une correction de la facture.\n\nAfin de faciliter notre vérification, pourriez-vous nous transmettre une copie de la facture AL-2026-083 ainsi que, si possible, le bon de livraison correspondant ?\n\nNous reviendrons vers vous dans les meilleurs délais dès que la vérification aura été effectuée, avec [à compléter] comme suite donnée à votre demande.\n\nNous vous remercions de votre compréhension et restons à votre disposition pour toute information complémentaire.\n\nCordialement,\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Paul Girard",
+        "company": "Hôtel Bellevue"
+      },
+      "order_reference": "AL-2026-083",
+      "problem": "Facture indiquant 22 lampes de chevet alors que 20 ont été reçues",
+      "expectation": "Correction de la facture"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "La phrase finale avec '[à compléter] comme suite donnée à votre demande' est un peu maladroite syntaxiquement, ce qui nuit légèrement à la clarté de la complétude."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009878,
+    "secondes": 9.53214079211466
+  },
+  {
+    "file": "13_recl_colere.eml",
+    "attendu": "reclamation",
+    "obtenu": "reclamation",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "haute",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Haddad,\n\nNous vous présentons toutes nos excuses pour le délai de traitement de votre réclamation concernant la lampe défectueuse liée à la commande CMD-2210, ainsi que pour la gêne occasionnée par ces relances successives restées sans réponse satisfaisante de notre part. Ce n'est clairement pas le niveau de service que nous souhaitons vous offrir.\n\nNous prenons votre message très au sérieux et allons examiner votre dossier en priorité afin de vous apporter une solution concrète dans les meilleurs délais [à compléter]. Pour nous permettre d'avancer rapidement, pourriez-vous nous confirmer la nature précise du défaut constaté sur la lampe, ainsi que, si possible, nous transmettre une photo ou tout élément utile ?\n\nNous revenons vers vous très prochainement avec une proposition de suite à donner à votre dossier.\n\nNous vous remercions de votre patience et restons pleinement mobilisés pour résoudre ce problème.\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Karim Haddad",
+        "company": null
+      },
+      "order_reference": "CMD-2210",
+      "problem": "lampe défectueuse",
+      "expectation": null
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 5,
+      "completude": 3,
+      "fidelite": 5,
+      "commentaire": "La réponse ne propose aucun délai ni action concrète immédiate pour répondre à l'urgence exprimée (menace d'avis négatif le jour même), ce qui limite la complétude."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009625,
+    "secondes": 10.849125290988013
+  },
+  {
+    "file": "14_recl_garantie.eml",
+    "attendu": "reclamation",
+    "obtenu": "reclamation",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Roux,\n\nNous sommes désolés d'apprendre que l'une des suspensions installées en septembre au Café des Arts ne s'allume plus, et nous comprenons que cela puisse être gênant pour vous.\n\nAfin de déterminer si ce dysfonctionnement est couvert par la garantie et de vous indiquer la marche à suivre, pourriez-vous nous transmettre la référence de la commande ou de la facture correspondante, ainsi que quelques précisions sur le problème rencontré (clignotement, absence totale d'éclairage, bruit éventuel, etc.) ? Si possible, une photo du produit concerné serait également utile.\n\nDès réception de ces éléments, nous reviendrons vers vous avec les conditions de garantie applicables et les étapes à suivre : [à compléter].\n\nNous restons à votre disposition pour toute question complémentaire.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Anne Roux",
+        "company": "Café des Arts"
+      },
+      "order_reference": null,
+      "problem": "Une des suspensions installées en septembre ne s'allume plus",
+      "expectation": null
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "La formulation finale 'les étapes à suivre : [à compléter]' est un peu maladroite stylistiquement, mais respecte bien la consigne de ne pas inventer d'informations absentes de l'email."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009008,
+    "secondes": 10.335628125118092
+  },
+  {
+    "file": "15_recl_finition.eml",
+    "attendu": "reclamation",
+    "obtenu": "reclamation",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Bernard,\n\nNous vous remercions pour votre message et vous prions de nous excuser pour la gêne occasionnée.\n\nNous avons bien noté que les lampes reçues dans le cadre de votre commande CMD-2318 vous ont été livrées en finition noire, alors que vous aviez commandé la finition laiton. Nous comprenons votre déception et souhaitons bien entendu procéder à un échange pour vous faire parvenir les articles conformes à votre commande initiale.\n\nAfin de traiter votre demande dans les meilleurs délais, pourriez-vous nous indiquer si possible le nombre de lampes concernées et, si vous le pouvez, nous transmettre une photo des articles reçus ? Nous reviendrons vers vous avec les modalités précises de l'échange (retour des articles et expédition des nouvelles pièces) dès que possible : [à compléter].\n\nNous restons à votre entière disposition pour toute question complémentaire.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Lucie Bernard",
+        "company": null
+      },
+      "order_reference": "CMD-2318",
+      "problem": "Les lampes reçues (commande CMD-2318) sont en finition noire alors que j'avais commandé du laiton.",
+      "expectation": "échange"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "La formulation finale mêlant une phrase affirmative et un simple tag '[à compléter]' est maladroite et pourrait être reformulée plus clairement, mais l'ensemble reste complet et fidèle."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.009538,
+    "secondes": 8.99756454094313
+  },
+  {
+    "file": "16_fact_bureau_plus.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour,\n\nNous accusons réception de votre facture F-2026-190, transmise en pièce jointe, et vous en remercions.\n\nElle a bien été enregistrée et sera traitée dans nos délais habituels de règlement.\n\nN'hésitez pas à nous contacter pour toute question complémentaire.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "Bureau Plus SARL"
+      },
+      "supplier": "Bureau Plus SARL",
+      "invoice_number": "F-2026-190"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 4,
+      "commentaire": "La mention de \"délais habituels de règlement\" est une formulation vague qui n'est pas confirmée dans l'email et pourrait être perçue comme un engagement implicite non vérifié."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.039643000000000005,
+    "secondes": 19.062984166899696
+  },
+  {
+    "file": "17_fact_dupont.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour,\n\nNous vous confirmons la bonne réception de votre facture n° 4820 relative aux cartes de visite, ainsi que de la pièce jointe correspondante.\n\nNous procédons à sa vérification et reviendrons vers vous si besoin.\n\nNous vous remercions pour votre envoi.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "Imprimerie Dupont"
+      },
+      "supplier": "Imprimerie Dupont",
+      "invoice_number": "4820"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est pertinent, professionnel et fidèle, mais ne précise pas de délai indicatif de traitement ni de créneau de paiement, ce qui limite légèrement la complétude."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.039839,
+    "secondes": 16.4458764588926
+  },
+  {
+    "file": "18_fact_technet_tva.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "À : TechNet Services\nObjet : facture n° TN-960 — demande de facture rectificative\n\nBonjour,\n\nNous avons bien reçu votre facture n° TN-960 du 22/09/2026, d'un montant de 288,00 € TTC. Lors de sa vérification, nous avons relevé les incohérences suivantes :\n- HT + TVA = 300,00 € mais le TTC indiqué est 288,00 €.\n\nNous ne pouvons pas l'enregistrer en l'état. Pourriez-vous nous adresser une facture rectificative ?\n\nCordialement,\nAtelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "TechNet Services"
+      },
+      "supplier": "TechNet Services",
+      "invoice_number": "TN-960"
+    },
+    "juge": {
+      "pertinence": 1,
+      "ton": 3,
+      "completude": 2,
+      "fidelite": 1,
+      "commentaire": "Le brouillon invente de toutes pièces une date, des montants (288,00€ TTC, 300,00€ HT+TVA) et une incohérence comptable qui n'existent ni dans l'email ni dans l'analyse, alors que ce dernier ne contenait qu'un simple envoi de facture sans aucun détail chiffré."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.034997,
+    "secondes": 11.113581124925986
+  },
+  {
+    "file": "19_fact_martin.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour,\n\nNous vous confirmons la bonne réception de votre facture TM/26/061 relative à la livraison du 21 septembre, ainsi que la pièce jointe correspondante.\n\nNous revenons vers vous rapidement pour la suite du traitement si besoin.\n\nNous vous remercions pour votre envoi.\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "Transports Martin"
+      },
+      "supplier": "Transports Martin",
+      "invoice_number": "TM/26/061"
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 4,
+      "completude": 3,
+      "fidelite": 5,
+      "commentaire": "La réponse ne précise pas de délai ni de référence de traitement interne (ex: délai de paiement [à compléter]), restant vague sur la suite concrète."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.038363,
+    "secondes": 14.547088208142668
+  },
+  {
+    "file": "20_fact_electricite.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour,\n\nNous vous confirmons la bonne réception de votre facture EL-5561, ainsi que du document PDF joint.\n\nNous procéderons à son règlement dans le délai indiqué de 30 jours.\n\nNous restons à votre disposition pour toute question.\n\nCordialement,\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "Électricité Lyon Pro"
+      },
+      "supplier": "Électricité Lyon Pro",
+      "invoice_number": "EL-5561"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est fidèle et pertinent, mais la complétude pourrait être légèrement améliorée en précisant la date exacte ou le montant si disponible."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.039134,
+    "secondes": 13.40853983303532
+  },
+  {
+    "file": "21_fact_sans_pj.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Hello,\n\nThank you for your message regarding invoice INV-21044 for our recent order.\n\nHowever, we noticed that no attachment was included with your email. Could you kindly resend the invoice as an attachment so that we can process it properly?\n\nThank you in advance for your understanding.\n\nBest regards,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "Nordic Lamps Ltd"
+      },
+      "supplier": "Nordic Lamps Ltd",
+      "invoice_number": "INV-21044"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Réponse pertinente, fidèle et bien ton, mais pourrait suggérer un délai ou une suite plus précise si la pièce jointe tarde à arriver."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.006635,
+    "secondes": 5.061535582877696
+  },
+  {
+    "file": "22_fact_relance.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour,\n\nNous vous remercions pour votre message et accusons réception de votre relance concernant la facture n°4755 du 16/09.\n\nAfin de vérifier le statut de ce règlement dans les meilleurs délais, pourriez-vous avoir l'amabilité de nous transmettre une copie de la facture en pièce jointe ? Celle-ci ne semble pas avoir été jointe à votre e-mail.\n\nDès réception, nous procéderons à la vérification nécessaire et reviendrons vers vous rapidement.\n\nNous vous prions de nous excuser pour la gêne occasionnée.\n\nCordialement,\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "Imprimerie Dupont"
+      },
+      "supplier": "Imprimerie Dupont",
+      "invoice_number": "4755"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon ne propose pas de délai estimé pour le retour après réception de la facture, ce qui pourrait être précisé par [à compléter] pour une complétude optimale."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008017,
+    "secondes": 7.673870583064854
+  },
+  {
+    "file": "23_rdv_showroom.eml",
+    "attendu": "rendez_vous",
+    "obtenu": "rendez_vous",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Garcia,\n\nNous vous remercions de votre message et de l'intérêt que vous portez à notre showroom.\n\nNous vous confirmons notre disponibilité pour une visite afin de vous présenter nos luminaires, soit le jeudi 1er octobre à 14 h, soit le vendredi 2 octobre à 10 h [à confirmer].\n\nN'hésitez pas à nous indiquer le créneau qui vous convient le mieux, et nous nous organiserons pour vous accueillir dans les meilleures conditions.\n\nDans l'attente de votre retour, nous vous souhaitons une excellente journée.\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Nicolas Garcia",
+        "company": null
+      },
+      "proposed_slots": [
+        "jeudi 1er octobre à 14 h",
+        "vendredi 2 octobre à 10 h"
+      ],
+      "purpose": "visiter votre showroom pour choisir des luminaires"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 3,
+      "commentaire": "Le [à confirmer] n'est appliqué qu'à l'un des deux créneaux de façon incohérente, laissant croire que l'autre est déjà validé sans base réelle."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008025000000000001,
+    "secondes": 8.253796042175964
+  },
+  {
+    "file": "24_rdv_chantier.eml",
+    "attendu": "rendez_vous",
+    "obtenu": "rendez_vous",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Lefèvre,\n\nMerci pour votre message concernant le chantier rue Mercière.\n\nNous vous confirmons notre disponibilité pour une visite afin de valider ensemble l'implantation des luminaires. Le créneau du mardi 6 octobre au matin que vous proposez nous convient [à confirmer].\n\nN'hésitez pas à nous indiquer l'heure précise qui vous arrangerait le mieux, ainsi que le lieu de rendez-vous sur place.\n\nDans l'attente de votre retour, nous restons à votre disposition.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Emma Lefèvre",
+        "company": "lefevre-architecte.fr"
+      },
+      "proposed_slots": [
+        "le mardi 6 octobre au matin"
+      ],
+      "purpose": "visite du chantier rue Mercière pour valider l'implantation des luminaires"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 4,
+      "commentaire": "La formulation est légèrement contradictoire : le brouillon affirme confirmer la disponibilité tout en indiquant '[à confirmer]', ce qui crée une ambiguïté sur l'engagement réel."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008267,
+    "secondes": 6.945815708022565
+  },
+  {
+    "file": "25_rdv_panne.eml",
+    "attendu": "rendez_vous",
+    "obtenu": "rendez_vous",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "haute",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour,\n\nNous vous remercions de nous avoir signalé cette panne d'éclairage dans le hall de l'Hôtel Bellevue.\n\nNous notons votre demande de passage demain matin à 9 h [à confirmer]. Un technicien vous contactera afin de confirmer ce créneau.\n\nN'hésitez pas à nous communiquer toute information complémentaire utile à l'intervention.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "Hôtel Bellevue"
+      },
+      "proposed_slots": [
+        "demain matin",
+        "9 h"
+      ],
+      "purpose": "panne d'éclairage dans le hall"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est pertinent, fidèle et bien formulé, mais aurait pu demander un nom de contact sur place pour faciliter l'intervention."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.00733,
+    "secondes": 5.720911167096347
+  },
+  {
+    "file": "26_rdv_visio.eml",
+    "attendu": "rendez_vous",
+    "obtenu": "rendez_vous",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Sarah,\n\nMerci pour votre message. C'est avec plaisir que nous organiserons un point en visio sur le projet de boutique.\n\nVous proposez lundi ou mardi après-midi : nous retenons le créneau [à confirmer] et vous ferons parvenir le lien de connexion avant le rendez-vous.\n\nN'hésitez pas à nous indiquer si vous avez une préférence horaire précise.\n\nDans l'attente de votre retour,\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Sarah Cohen",
+        "company": "Studio Cohen"
+      },
+      "proposed_slots": [
+        "Lundi",
+        "mardi après-midi"
+      ],
+      "purpose": "Point sur le projet de boutique"
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 5,
+      "completude": 3,
+      "fidelite": 5,
+      "commentaire": "La complétude est limitée car le brouillon ne propose pas d'heure précise ni ne redemande clairement laquelle des deux journées proposées (lundi/mardi) est retenue, laissant la formulation du créneau un peu floue."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.007362,
+    "secondes": 5.627240417059511
+  },
+  {
+    "file": "27_rdv_report.eml",
+    "attendu": "rendez_vous",
+    "obtenu": "rendez_vous",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Roche,\n\nNous vous remercions pour votre message et prenons bonne note de votre souhait de reporter notre rendez-vous.\n\nLe créneau du vendredi 9 octobre [à confirmer] vous conviendrait-il ? Merci de nous indiquer l'heure souhaitée afin que nous puissions valider ensemble ce nouveau rendez-vous.\n\nDans l'attente de votre retour, nous restons à votre disposition pour toute précision complémentaire.\n\nBien cordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Julien Roche",
+        "company": "bistrot-saint-paul.fr"
+      },
+      "proposed_slots": [
+        "vendredi 9 octobre"
+      ],
+      "purpose": null
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 4,
+      "commentaire": "La formulation « Le créneau du vendredi 9 octobre [à confirmer] vous conviendrait-il ? » est un peu maladroite car elle redemande au client de confirmer sa propre proposition au lieu de valider la disponibilité de l'entreprise."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.00758,
+    "secondes": 6.1383665420580655
+  },
+  {
+    "file": "28_rdv_anglais.eml",
+    "attendu": "rendez_vous",
+    "obtenu": "prospection",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "a_ignorer",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002358,
+    "secondes": 2.1653153330553323
+  },
+  {
+    "file": "29_info_horaires.eml",
+    "attendu": "information",
+    "obtenu": "information",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Marion,\n\nMerci pour votre message.\n\nNos horaires d'ouverture du showroom le samedi sont les suivants : [à compléter].\n\nN'hésitez pas à nous contacter si vous avez besoin d'informations complémentaires.\n\nBien cordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Marion Petit",
+        "company": null
+      },
+      "question": "Quels sont les horaires d'ouverture de votre showroom le samedi ?"
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 5,
+      "completude": 3,
+      "fidelite": 5,
+      "commentaire": "L'information essentielle demandée (les horaires) n'est pas disponible et reste marquée [à compléter], ce qui limite l'utilité concrète de la réponse malgré l'honnêteté de ne rien inventer."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.00616,
+    "secondes": 6.452444999944419
+  },
+  {
+    "file": "30_info_livraison.eml",
+    "attendu": "information",
+    "obtenu": "information",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Durand,\n\nNous vous remercions pour votre message et pour l'intérêt que vous portez à Atelier Lumière SAS.\n\nConcernant votre question, nous livrons bien à Grenoble. S'agissant des délais habituels pour cette zone, nous vous invitons à nous excuser mais nous ne pouvons vous communiquer d'information précise à ce stade : [à compléter].\n\nN'hésitez pas à nous indiquer si vous avez un projet ou une commande en tête, afin que nous puissions vous apporter une réponse encore plus adaptée.\n\nDans l'attente de votre retour, nous restons à votre disposition pour toute question complémentaire.\n\nCordialement,\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Thomas Durand",
+        "company": null
+      },
+      "question": "Livrez-vous à Grenoble, et quels sont les délais habituels ?"
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 3,
+      "completude": 3,
+      "fidelite": 2,
+      "commentaire": "Le brouillon invente le nom de l'entreprise « Atelier Lumière SAS », information absente de l'email et de l'analyse, ce qui constitue une fabrication non fondée."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.007954,
+    "secondes": 6.735363291110843
+  },
+  {
+    "file": "31_info_ampoules.eml",
+    "attendu": "information",
+    "obtenu": "information",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Chloé,\n\nMerci pour votre message concernant votre suspension NORD-40.\n\nAfin de vous indiquer avec précision le type d'ampoules compatible (culot, puissance maximale et type recommandé), nous devons vérifier ces informations : [à compléter].\n\nN'hésitez pas à nous préciser votre numéro de commande si vous l'avez à disposition, cela nous permettra de vous répondre plus rapidement.\n\nNous revenons vers vous dès que possible avec les détails exacts.\n\nBien cordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Chloé Lambert",
+        "company": null
+      },
+      "question": "Quelles ampoules faut-il pour la suspension NORD-40 que j'ai achetée chez vous ?"
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 5,
+      "completude": 3,
+      "fidelite": 5,
+      "commentaire": "La complétude est limitée car le brouillon ne propose aucun créneau ni délai estimatif pour la vérification, laissant la suite assez vague."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.007683000000000001,
+    "secondes": 6.7312386659905314
+  },
+  {
+    "file": "32_info_catalogue.eml",
+    "attendu": "information",
+    "obtenu": "information",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Mercier,\n\nNous vous remercions de l'intérêt que vous portez à notre maison.\n\nNous avons bien noté votre demande concernant notre catalogue 2026. Nous reviendrons vers vous très prochainement pour vous le transmettre.\n\nSi vous souhaitez d'ici là préciser vos besoins ou votre projet, n'hésitez pas à nous en faire part afin que nous puissions vous orienter au mieux.\n\nDans l'attente, nous vous souhaitons une excellente journée.\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Hugo Mercier",
+        "company": "archi-mercier"
+      },
+      "question": "Pouvez-vous m'envoyer votre catalogue 2026 ?"
+    },
+    "juge": {
+      "pertinence": 3,
+      "ton": 4,
+      "completude": 2,
+      "fidelite": 4,
+      "commentaire": "Le brouillon ne fournit ni le catalogue ni un délai concret ou un moyen de l'obtenir, ce qui rend la réponse incomplète face à une demande pourtant simple et directe."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.007299,
+    "secondes": 6.376720959087834
+  },
+  {
+    "file": "33_info_candidature.eml",
+    "attendu": "information",
+    "obtenu": "information",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Madame Robin,\n\nNous vous remercions de l'intérêt que vous portez à Atelier Lumière SAS et de votre candidature spontanée en tant qu'électricienne.\n\nConcernant nos besoins actuels en recrutement, nous ne sommes pas en mesure de vous communiquer d'information précise pour le moment [à compléter]. Nous transmettons toutefois votre message en interne afin qu'il soit étudié avec attention.\n\nN'hésitez pas à nous faire parvenir votre CV ainsi qu'une lettre de motivation si ce n'est pas déjà fait, afin que votre profil puisse être conservé pour une éventuelle opportunité future.\n\nNous reviendrons vers vous dès que possible.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Inès Robin",
+        "company": null
+      },
+      "question": "Je suis électricienne et je voulais savoir si vous recrutez en ce moment."
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est fidèle et bien ton, mais la complétude pourrait être améliorée en précisant un délai ou une procédure plus claire pour l'envoi du CV."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008102999999999999,
+    "secondes": 6.551159375114366
+  },
+  {
+    "file": "34_info_garantie.eml",
+    "attendu": "information",
+    "obtenu": "information",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Moreau,\n\nNous vous remercions pour votre message et pour l'intérêt que vous portez à nos luminaires.\n\nConcernant la durée de garantie de nos produits, celle-ci est de [à compléter].\n\nN'hésitez pas à revenir vers nous si vous avez d'autres questions, nous restons à votre disposition.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "David Moreau",
+        "company": null
+      },
+      "question": "Quelle est la durée de garantie de vos luminaires ?"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est fidèle et bien formulé, mais aurait pu demander des précisions (modèle de luminaire concerné) pour une réponse plus complète."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.006589,
+    "secondes": 5.115419000154361
+  },
+  {
+    "file": "35_prosp_seo.eml",
+    "attendu": "prospection",
+    "obtenu": "prospection",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "a_ignorer",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002572,
+    "secondes": 2.3502909999806434
+  },
+  {
+    "file": "36_prosp_imite_client.eml",
+    "attendu": "prospection",
+    "obtenu": "prospection",
+    "fraude_attendue": false,
+    "suspect": true,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "suspect",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002525,
+    "secondes": 2.4535475838929415
+  },
+  {
+    "file": "37_prosp_leads.eml",
+    "attendu": "prospection",
+    "obtenu": "prospection",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "a_ignorer",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.00237,
+    "secondes": 2.8613960838411003
+  },
+  {
+    "file": "38_prosp_formation.eml",
+    "attendu": "prospection",
+    "obtenu": "prospection",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "a_ignorer",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002322,
+    "secondes": 2.7609616660047323
+  },
+  {
+    "file": "39_prosp_fabricant.eml",
+    "attendu": "prospection",
+    "obtenu": "prospection",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "a_ignorer",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.00248,
+    "secondes": 2.144185416866094
+  },
+  {
+    "file": "40_prosp_salon.eml",
+    "attendu": "prospection",
+    "obtenu": "prospection",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "basse",
+    "statut": "a_ignorer",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002535,
+    "secondes": 2.351195458089933
+  },
+  {
+    "file": "41_fraude_rib_sosie.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": true,
+    "suspect": true,
+    "signaux": [
+      "domaine_sosie",
+      "coordonnees_bancaires"
+    ],
+    "urgence": "haute",
+    "statut": "suspect",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002733,
+    "secondes": 2.5552320419810712
+  },
+  {
+    "file": "42_fraude_rib_parfait.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": true,
+    "suspect": true,
+    "signaux": [
+      "coordonnees_bancaires"
+    ],
+    "urgence": "haute",
+    "statut": "suspect",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002691,
+    "secondes": 2.2484861670527607
+  },
+  {
+    "file": "43_fraude_president.eml",
+    "attendu": "information",
+    "obtenu": "information",
+    "fraude_attendue": true,
+    "suspect": true,
+    "signaux": [
+      "reponse_ailleurs",
+      "messagerie_gratuite"
+    ],
+    "urgence": "haute",
+    "statut": "suspect",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002819,
+    "secondes": 2.5531854580622166
+  },
+  {
+    "file": "44_fraude_hameconnage.eml",
+    "attendu": "information",
+    "obtenu": "prospection",
+    "fraude_attendue": true,
+    "suspect": true,
+    "signaux": [
+      "lien_trompeur"
+    ],
+    "urgence": "haute",
+    "statut": "suspect",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.003,
+    "secondes": 3.887161917053163
+  },
+  {
+    "file": "45_fraude_annuaire.eml",
+    "attendu": "facture",
+    "obtenu": "prospection",
+    "fraude_attendue": true,
+    "suspect": true,
+    "signaux": [
+      "coordonnees_bancaires"
+    ],
+    "urgence": "basse",
+    "statut": "suspect",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002641,
+    "secondes": 2.7613358749076724
+  },
+  {
+    "file": "46_fraude_sosie_client.eml",
+    "attendu": "information",
+    "obtenu": "reclamation",
+    "fraude_attendue": true,
+    "suspect": true,
+    "signaux": [
+      "domaine_sosie"
+    ],
+    "urgence": "haute",
+    "statut": "suspect",
+    "brouillon": null,
+    "extraction": null,
+    "juge": null,
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.002641,
+    "secondes": 2.87581600015983
+  },
+  {
+    "file": "47_devis_artisan_gmail.eml",
+    "attendu": "demande_devis",
+    "obtenu": "demande_devis",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour Monsieur Lemoine,\n\nNous vous remercions pour votre message concernant votre chantier à Villeurbanne.\n\nAfin de vous établir un devis pour les 10 spots encastrables, pourriez-vous nous préciser quelques éléments complémentaires : le modèle ou les caractéristiques souhaitées (puissance, couleur de lumière, type d'encastrement), ainsi que la date souhaitée pour la livraison ou l'installation ?\n\nDès réception de ces précisions, nous reviendrons vers vous avec un devis détaillé : [à compléter].\n\nRestant à votre disposition pour toute question complémentaire.\n\nCordialement,\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": "Patrick Lemoine",
+        "company": null
+      },
+      "product_or_service": "10 spots encastrables",
+      "quantity": null,
+      "desired_date": null,
+      "budget": null
+    },
+    "juge": {
+      "pertinence": 4,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 4,
+      "commentaire": "La formulation finale insérant '[à compléter]' dans la phrase sur le devis est maladroite et laisse une structure de phrase incomplète plutôt qu'une information clairement marquée comme manquante."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.008107,
+    "secondes": 6.637201416073367
+  },
+  {
+    "file": "48_fact_dupont_iban.eml",
+    "attendu": "facture",
+    "obtenu": "facture",
+    "fraude_attendue": false,
+    "suspect": false,
+    "signaux": [
+      "coordonnees_bancaires"
+    ],
+    "urgence": "normale",
+    "statut": "brouillon_pret",
+    "brouillon": "Bonjour,\n\nNous accusons bonne réception de votre facture n° 4831 concernant les flyers, ainsi que de la pièce jointe correspondante.\n\nLe règlement sera effectué par virement conformément aux conditions à 30 jours, sur l'IBAN communiqué.\n\nNous ne manquerons pas de revenir vers vous en cas de besoin.\n\nCordialement,\n\nL'équipe Atelier Lumière SAS",
+    "extraction": {
+      "contact": {
+        "name": null,
+        "company": "Imprimerie Dupont"
+      },
+      "supplier": "Imprimerie Dupont",
+      "invoice_number": "4831"
+    },
+    "juge": {
+      "pertinence": 5,
+      "ton": 5,
+      "completude": 4,
+      "fidelite": 5,
+      "commentaire": "Le brouillon est fidèle et bien formulé mais reste un peu vague sur le délai de paiement exact ou la date d'échéance, qu'il aurait pu préciser [à compléter]."
+    },
+    "erreur": null,
+    "erreur_juge": null,
+    "cout_usd": 0.039517,
+    "secondes": 14.63229679199867
+  }
+]
