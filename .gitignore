@@ -10,3 +10,4 @@ data/
 .playwright-mcp/
 inbox/traites/
 evals/results/pieces_jointes/
+inbox/*.eml
