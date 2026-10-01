@@ -13,6 +13,8 @@ def make_email(**overrides) -> Email:
         "received_at": datetime(2026, 9, 28, 9, 15, tzinfo=timezone.utc),
         "body": "Bonjour, nous souhaiterions un devis pour 12 suspensions en laiton. Cordialement, Claire Martin",
         "attachments": [],
+        "reply_to": "",
+        "links": [],
     }
     data.update(overrides)
     return Email.model_validate(data)
@@ -30,6 +32,7 @@ def build_eml(
     attachments: tuple = (),
     message_id: str | None = "<abc@exemple.fr>",
     sender: str | None = "Marie Dubois <marie@exemple.fr>",
+    reply_to: str | None = None,
     date: str = "Mon, 28 Sep 2026 09:15:00 +0200",
 ) -> bytes:
     msg = EmailMessage()
@@ -40,6 +43,8 @@ def build_eml(
     msg["Date"] = date
     if message_id:
         msg["Message-ID"] = message_id
+    if reply_to:
+        msg["Reply-To"] = reply_to
     if body is None:
         msg.set_content(html or "", subtype="html")
     else:

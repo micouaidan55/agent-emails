@@ -156,3 +156,30 @@ def test_anonymous_pdfs_get_distinct_pdf_names():
     # Should be piece_jointe_0.pdf and piece_jointe_1.pdf
     assert names[0].endswith(".pdf")
     assert names[1].endswith(".pdf")
+
+
+def test_reply_to_is_captured():
+    email = parse_eml(build_eml(reply_to="Paiements <paiement@autre-domaine.com>"))
+    assert email.reply_to == "paiement@autre-domaine.com"
+
+
+def test_reply_to_absent_is_empty():
+    assert parse_eml(build_eml()).reply_to == ""
+
+
+def test_links_keep_displayed_text_and_real_address():
+    html = ('<p>Connectez-vous sur <a href="http://bp-verif.xyz/login"> www.banquepopulaire.fr </a>'
+            ' ou revenez <a href="#haut">en haut</a>.</p>')
+    email = parse_eml(build_eml(body=None, html=html))
+    assert [(link.text, link.url) for link in email.links] == [("www.banquepopulaire.fr", "http://bp-verif.xyz/login")]
+    assert "www.banquepopulaire.fr" in email.body
+
+
+def test_links_are_read_from_the_html_alternative():
+    email = parse_eml(build_eml(body="Texte brut", html='<a href="https://exemple.fr">Exemple</a>'))
+    assert email.body.strip() == "Texte brut"
+    assert [(link.text, link.url) for link in email.links] == [("Exemple", "https://exemple.fr")]
+
+
+def test_plain_text_email_has_no_links():
+    assert parse_eml(build_eml()).links == []

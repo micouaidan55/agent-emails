@@ -46,6 +46,11 @@ class Attachment(BaseModel):
     data: bytes = Field(default=b"", exclude=True, repr=False)
 
 
+class Link(BaseModel):
+    text: str
+    url: str
+
+
 class Email(BaseModel):
     message_id: str
     sender_name: str = ""
@@ -54,6 +59,8 @@ class Email(BaseModel):
     received_at: datetime
     body: str
     attachments: list[Attachment] = Field(default_factory=list)
+    reply_to: str = ""
+    links: list[Link] = Field(default_factory=list)
 
 
 class Triage(BaseModel):
@@ -148,9 +155,11 @@ class EmailResult(BaseModel):
 def render_email(email: Email) -> str:
     """Email présenté au modèle. Les balises <email> marquent un contenu non fiable."""
     attachments = ", ".join(neutralize(a.filename) for a in email.attachments) or "aucune"
+    reply_to = f"Répondre à : {neutralize(email.reply_to)}\n" if email.reply_to else ""
     return (
         "<email>\n"
         f"De : {neutralize(email.sender_name)} <{neutralize(email.sender_address)}>\n"
+        f"{reply_to}"
         f"Date : {email.received_at:%d/%m/%Y %H:%M}\n"
         f"Objet : {neutralize(email.subject)}\n"
         f"Pièces jointes : {attachments}\n\n"

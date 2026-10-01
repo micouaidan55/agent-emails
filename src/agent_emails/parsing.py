@@ -8,7 +8,7 @@ from email.parser import BytesParser
 from email.utils import parseaddr, parsedate_to_datetime
 from html.parser import HTMLParser
 
-from agent_emails.models import Attachment, Email
+from agent_emails.models import Attachment, Email, Link
 
 
 class EmailParseError(ValueError):
@@ -28,9 +28,16 @@ class _TextExtractor(HTMLParser):
         super().__init__()
         self.parts: list[str] = []
         self._skip = 0
+        self.links: list[Link] = []
+        self._href: str | None = None
+        self._anchor: list[str] = []
 
     def handle_starttag(self, tag, attrs):
-        if tag in self.SKIP_TAGS:
+        if tag == "a":
+            href = (dict(attrs).get("href") or "").strip()
+            self._href = href if href and not href.startswith("#") else None
+            self._anchor = []
+        elif tag in self.SKIP_TAGS:
             self._skip += 1
         elif tag in self.CELL_TAGS:
             self.parts.append(" ")
@@ -38,7 +45,10 @@ class _TextExtractor(HTMLParser):
             self.parts.append("\n")
 
     def handle_endtag(self, tag):
-        if tag in self.SKIP_TAGS:
+        if tag == "a" and self._href is not None:
+            self.links.append(Link(text=" ".join("".join(self._anchor).split()), url=self._href))
+            self._href = None
+        elif tag in self.SKIP_TAGS:
             self._skip = max(0, self._skip - 1)
         elif tag in self.CELL_TAGS:
             self.parts.append(" ")
@@ -48,6 +58,8 @@ class _TextExtractor(HTMLParser):
     def handle_data(self, data):
         if not self._skip:
             self.parts.append(data)
+            if self._href is not None:
+                self._anchor.append(data)
 
 
 def html_to_text(html: str) -> str:
@@ -60,6 +72,13 @@ def html_to_text(html: str) -> str:
         if line or (kept and kept[-1]):
             kept.append(line)
     return "\n".join(kept).strip()
+
+
+def extract_links(html: str) -> list[Link]:
+    extractor = _TextExtractor()
+    extractor.feed(html)
+    extractor.close()
+    return extractor.links
 
 
 def _received_at(value) -> datetime:
@@ -120,6 +139,15 @@ def parse_eml(raw: bytes) -> Email:
                 content = payload.decode("utf-8", errors="replace")
             body = html_to_text(content) if body_part.get_content_type() == "text/html" else content
 
+        links: list[Link] = []
+        html_part = msg.get_body(preferencelist=("html",))
+        if html_part is not None:
+            try:
+                links = extract_links(html_part.get_content())
+            except LookupError:
+                links = []
+        reply_to = parseaddr(str(msg["Reply-To"] or ""))[1]
+
         used_names: set[str] = set()
         attachments: list[Attachment] = []
         for idx, part in enumerate(msg.iter_attachments()):
@@ -145,6 +173,8 @@ def parse_eml(raw: bytes) -> Email:
             received_at=_received_at(msg["Date"]),
             body=body,
             attachments=attachments,
+            reply_to=reply_to,
+            links=links,
         )
     except EmailParseError:
         raise

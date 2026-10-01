@@ -67,3 +67,10 @@ def test_render_email_neutralizes_delimiter_tags():
     assert "<analyse>" not in text
     assert "</analyse>" not in text
     assert "‹/email>" in text
+
+
+def test_render_email_shows_reply_to_only_when_present():
+    assert "Répondre à" not in render_email(make_email())
+    text = render_email(make_email(reply_to="paiement@autre.fr"))
+    assert "Répondre à : paiement@autre.fr" in text
+    assert text.index("De :") < text.index("Répondre à :") < text.index("Date :")
