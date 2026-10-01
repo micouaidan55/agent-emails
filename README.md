@@ -76,3 +76,5 @@ Les tests utilisent un faux client et ne consomment aucun crédit d'API.
 - V1 limitée à un dossier de fichiers `.eml` : les connecteurs Gmail et IMAP sont la prochaine étape.
 - Pas de gestion des fils de discussion ni du multi-utilisateur.
 - Les emails d'évaluation sont synthétiques : la mesure sur de vrais emails anonymisés reste à faire.
+- Détection de fraude volontairement simple : pas de décodage des domaines internationalisés (punycode), ni de vérification SPF/DKIM, qui relèvent du serveur de messagerie. Une boîte mail réellement piratée chez un fournisseur connu n'est repérée que par le jugement du modèle.
+- Coût : quand une sortie du modèle est invalide puis rejetée, le coût de cette tentative n'est pas comptabilisé ; un email en erreur d'API est retenté (et donc refacturé) au relevé suivant.
