@@ -13,21 +13,29 @@ Une PME reçoit chaque jour des demandes de devis, des réclamations, des factur
 5. **Repère les fraudes** : changement de RIB, faux président, hameçonnage, fausse facture, expéditeur qui imite un client. Un email suspect est bloqué (ni réponse, ni transmission de facture) jusqu'à votre décision.
 6. **Attend votre validation** : vous relisez, corrigez et validez. Le brouillon est déposé, jamais envoyé automatiquement.
 
-## Résultats mesurés
+## Évaluation
 
-Évaluation sur 48 emails générés : 42 emails légitimes (devis, réclamations, factures dont 6 avec PDF, rendez-vous, informations, prospections) et 6 fraudes (2 changements de RIB dont un sans aucun signal technique, un faux président, un hameçonnage, une fausse facture d'annuaire, un domaine sosie d'un client). Pièges : réclamation polie mais urgente, devis déguisé en question, prospection qui imite un client, emails en anglais et en HTML, facture annoncée sans pièce jointe, artisan qui écrit depuis Gmail, fournisseur habituel qui mentionne son IBAN.
+Évaluation sur 48 emails générés : 42 emails légitimes (devis, réclamations, factures dont 6 avec PDF, rendez-vous, informations, prospections) et 6 fraudes (2 changements de RIB dont un sans signal technique fort, un faux président, un hameçonnage, une fausse facture d'annuaire, un domaine sosie d'un client). Pièges : réclamation polie mais urgente, devis déguisé en question, prospection qui imite un client, emails en anglais et en HTML, facture annoncée sans pièce jointe, artisan qui écrit depuis Gmail, fournisseur habituel qui mentionne son IBAN.
 
-Voir `evals/results/`. Pour reproduire (payant, plafonné) : `uv run python -m evals.run --max-cost 2`.
+Les résultats chiffrés seront publiés ici après le premier run d'évaluation. Pour reproduire (payant, plafonné) : `uv run python -m evals.run --max-cost 2`.
 
 ## Démarrage rapide
 
 ```bash
 git clone https://github.com/micouaidan55/agent-emails.git && cd agent-emails
-cp .env.example .env        # puis renseigner ANTHROPIC_API_KEY (et COMPANY_NAME / COMPANY_DOMAIN, le nom et le domaine de votre entreprise)
+cp .env.example .env        # puis renseigner ANTHROPIC_API_KEY (et COMPANY_NAME / COMPANY_DOMAIN / KNOWN_DOMAINS : le nom, le domaine et les domaines de clients et fournisseurs connus)
 uv sync
 uv run python -m evals.generate && cp evals/dataset/*.eml inbox/
 uv run streamlit run app/main.py
 ```
+
+Attention : le relevé appelle l'API Claude (payant). Les 48 emails de démonstration coûtent environ 1 $ et prennent quelques minutes ; pour un premier essai, copiez seulement quelques fichiers.
+
+Pour enregistrer les factures validées directement dans la base de l'agent de factures, pointez AGENT_FACTURES_DB vers son fichier (par exemple ../agent-factures/data/factures.db).
+
+### Démo
+
+La liste des domaines connus (KNOWN_DOMAINS) est pré-remplie avec les clients et fournisseurs de la démonstration : les domaines sosies comme hoteI-canuts.fr sont donc repérés par le code.
 
 ## Architecture
 
@@ -46,7 +54,7 @@ inbox/*.eml ─► MailSource ─► signaux de fraude (code) + ① tri et avis 
 
 ### Pourquoi un pipeline plutôt qu'un agent
 
-Le tri d'emails est une tâche **bien définie** : l'enchaînement des étapes est connu à l'avance. Un pipeline piloté par le code est donc plus fiable, moins cher et plus facile à mesurer qu'un agent qui décide seul de ses actions. Chaque étape a sa propre évaluation, et **le bon modèle est placé au bon endroit** : Haiku pour trier et extraire (rapide, environ 5 fois moins cher), Sonnet pour rédiger. L'[agent de factures](https://github.com/micouaidan55/agent-factures), lui, reste un agent, car vérifier une facture demande de choisir ses contrôles.
+Le tri d'emails est une tâche **bien définie** : l'enchaînement des étapes est connu à l'avance. Un pipeline piloté par le code est donc plus fiable, moins cher et plus facile à mesurer qu'un agent qui décide seul de ses actions. Chaque étape a sa propre évaluation, et **le bon modèle est placé au bon endroit** : Haiku pour trier et extraire (rapide, deux fois moins cher), Sonnet pour rédiger. L'[agent de factures](https://github.com/micouaidan55/agent-factures), lui, reste un agent, car vérifier une facture demande de choisir ses contrôles.
 
 ### Détection de fraude : le code vérifie, le modèle juge
 
