@@ -8,7 +8,7 @@ from agent_factures.extraction.models import Issue
 from pydantic import BaseModel, Field
 
 
-_DELIMITERS = re.compile(r"<(/?)(email|analyse|brouillon)\b", re.IGNORECASE)
+_DELIMITERS = re.compile(r"<(/?)(email|analyse|brouillon|signaux)\b", re.IGNORECASE)
 
 
 def neutralize(text: str) -> str:
@@ -38,6 +38,23 @@ class EmailStatus(StrEnum):
     VALIDATED = "valide"
     IGNORED = "ignore"
     ERROR = "erreur"
+
+
+class FraudRisk(StrEnum):
+    NONE = "aucun"
+    LOW = "faible"
+    HIGH = "eleve"
+
+
+class FraudSeverity(StrEnum):
+    STRONG = "forte"
+    WEAK = "faible"
+
+
+class FraudSignal(BaseModel):
+    code: str
+    severity: FraudSeverity
+    message: str
 
 
 class Attachment(BaseModel):
