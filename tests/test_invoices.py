@@ -61,3 +61,60 @@ def test_analyzer_failure_becomes_a_review(tmp_path):
 
 def test_no_attachment_no_check(tmp_path):
     assert check_invoices(make_email(), StubAnalyzer(result=anomaly()), tmp_path) == []
+
+
+def test_first_analyzer_fails_second_ok(tmp_path):
+    email = make_email(attachments=[pdf_attachment("first.pdf"), pdf_attachment("second.pdf")])
+    analyzer = StubAnalyzer(result=anomaly())
+    analyzer.result_for_call = {0: RuntimeError("premier échoue"), 1: anomaly()}
+
+    class SelectiveErrorAnalyzer:
+        def __init__(self):
+            self.paths = []
+            self.call_count = 0
+
+        def process(self, path: Path) -> AgentResult:
+            self.paths.append(path)
+            if self.call_count == 0:
+                self.call_count += 1
+                raise RuntimeError("premier échoue")
+            self.call_count += 1
+            return anomaly()
+
+    analyzer = SelectiveErrorAnalyzer()
+    checks = check_invoices(email, analyzer, tmp_path)
+    assert len(checks) == 2
+    assert checks[0].status == "a_revoir"
+    assert "premier échoue" in checks[0].explanation
+    assert checks[1].status == "anomalie"
+    assert checks[1].invoice["number"] == "TN-960"
+
+
+def test_duplicate_basenames_get_suffixed(tmp_path):
+    email = make_email(attachments=[pdf_attachment("facture.pdf"), pdf_attachment("facture.pdf")])
+    analyzer = StubAnalyzer(result=anomaly())
+    checks = check_invoices(email, analyzer, tmp_path)
+    assert len(checks) == 2
+    paths = [Path(c.path) for c in checks]
+    assert paths[0].name == "facture.pdf"
+    assert paths[1].name == "facture_2.pdf"
+    assert paths[0] != paths[1]
+    assert paths[0].read_bytes() == b"%PDF-1.4 fake"
+    assert paths[1].read_bytes() == b"%PDF-1.4 fake"
+
+
+def test_write_failure_becomes_a_revoir(tmp_path, monkeypatch):
+    email = make_email(attachments=[pdf_attachment()])
+    analyzer = StubAnalyzer(result=anomaly())
+
+    original_write = Path.write_bytes
+
+    def failing_write(self, data):
+        raise OSError("Écriture impossible")
+
+    monkeypatch.setattr(Path, "write_bytes", failing_write)
+    checks = check_invoices(email, analyzer, tmp_path)
+    assert len(checks) == 1
+    assert checks[0].status == "a_revoir"
+    assert "Écriture impossible" in checks[0].explanation
+    assert checks[0].invoice is None

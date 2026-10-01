@@ -18,14 +18,24 @@ class InvoiceAnalyzer(Protocol):
 def check_invoices(email: Email, analyzer: InvoiceAnalyzer, workdir: Path) -> list[InvoiceCheck]:
     folder = workdir / hashlib.sha1(email.message_id.encode()).hexdigest()[:16]
     checks = []
+    written_names = set()
     for attachment in email.attachments:
         name = Path(attachment.filename).name or "piece_jointe"
         if Path(name).suffix.lower() not in INVOICE_SUFFIXES:
             continue
-        folder.mkdir(parents=True, exist_ok=True)
-        path = folder / name
-        path.write_bytes(attachment.data)
+        # Handle duplicate basenames by suffixing
+        original_name = name
+        counter = 2
+        while name in written_names:
+            stem = Path(original_name).stem
+            suffix = Path(original_name).suffix
+            name = f"{stem}_{counter}{suffix}"
+            counter += 1
+        written_names.add(name)
         try:
+            folder.mkdir(parents=True, exist_ok=True)
+            path = folder / name
+            path.write_bytes(attachment.data)
             result = analyzer.process(path)
         except Exception as exc:
             checks.append(InvoiceCheck(filename=name, path=str(path), status="a_revoir",
