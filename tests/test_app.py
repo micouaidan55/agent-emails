@@ -4,7 +4,7 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 from agent_emails import web
-from agent_emails.models import Category, EmailResult, EmailStatus, Triage
+from agent_emails.models import Category, EmailResult, EmailStatus, FraudSeverity, FraudSignal, Link, Triage
 from agent_emails.storage.db import connect
 from agent_emails.storage.repository import EmailStore
 from tests.factories import make_email
@@ -42,7 +42,8 @@ def run_app(page: str | None = None) -> AppTest:
 
 def test_every_page_renders(env):
     for page in (None, "app_pages/tableau_de_bord.py", "app_pages/journal_valides.py",
-                 "app_pages/journal_ignores.py", "app_pages/journal_historique.py"):
+                 "app_pages/journal_ignores.py", "app_pages/journal_fraudes.py",
+                 "app_pages/journal_historique.py"):
         run_app(page)
 
 
@@ -139,3 +140,85 @@ def test_correcting_the_urgency_is_recorded(env):
     assert not at.exception
     assert store.get(ID).urgency.value == "basse"
     assert store._conn.execute("SELECT COUNT(*) FROM corrections WHERE field = 'urgency'").fetchone()[0] == 1
+
+
+SUSPECT_ID = "<rib@fraude.fr>"
+
+
+@pytest.fixture
+def suspect(env):
+    tmp_path, store = env
+    email = make_email(message_id=SUSPECT_ID, sender_address="compta@bureau-plus.fr", subject="Nouveau RIB",
+                       links=[Link(text="www.bureauplus.fr", url="http://voleur.xyz/rib")])
+    store.save_result(EmailResult(
+        email=email, status=EmailStatus.SUSPECT,
+        triage=Triage(category="facture", urgency="haute", confidence=0.9, explanation="E.", summary="Changement de RIB",
+                      fraud_risk="eleve", fraud_reason="Demande de paiement sur un nouveau compte."),
+        fraud_signals=[FraudSignal(code="domaine_sosie", severity=FraudSeverity.STRONG,
+                                   message="Le domaine bureau-plus.fr imite bureauplus.fr, un domaine connu.")],
+    ))
+    return tmp_path, store
+
+
+def open_suspect(at):
+    # L'email suspect est en tête de liste : c'est le premier bouton « Ouvrir ».
+    next(b for b in at.button if b.key == "open-0").click().run()
+    return at
+
+
+def test_suspect_email_comes_first_with_a_red_badge(suspect):
+    at = run_app()
+    first = next(m.value for m in at.markdown if "Nouveau RIB" in m.value or "Demande de devis" in m.value)
+    assert "Nouveau RIB" in first and "Fraude possible" in first
+
+
+def test_suspect_card_shows_signals_links_as_text_and_no_draft(suspect):
+    at = open_suspect(run_app())
+    assert any("imite bureauplus" in e.value for e in at.error)
+    assert any("http://voleur.xyz/rib" in c.value for c in at.code)
+    assert not any("voleur.xyz" in m.value and "](" in m.value for m in at.markdown)
+    assert not [t for t in at.text_area if t.key == f"draft-{SUSPECT_ID}"]
+    assert not [b for b in at.button if b.key == f"valider-{SUSPECT_ID}"]
+
+
+def test_confirm_fraud(suspect):
+    _, store = suspect
+    at = open_suspect(run_app())
+    next(b for b in at.button if b.key == f"fraude-{SUSPECT_ID}").click().run()
+    assert store.get(SUSPECT_ID).status is EmailStatus.FRAUD
+    assert store.list_log()[0]["action"] == "fraude_confirmee"
+    at.switch_page("app_pages/journal_fraudes.py").run()
+    assert not at.exception
+    assert any("Nouveau RIB" in e.label for e in at.expander)
+
+
+def test_clear_alert_without_api_key_changes_nothing(suspect):
+    _, store = suspect
+    at = open_suspect(run_app())
+    next(b for b in at.button if b.key == f"pas-fraude-{SUSPECT_ID}").click().run()
+    assert any("Clé d'API" in e.value for e in at.error)
+    assert store.get(SUSPECT_ID).status is EmailStatus.SUSPECT
+
+
+def test_clear_alert_reprocesses(suspect, monkeypatch):
+    _, store = suspect
+    calls = []
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+    monkeypatch.setattr(web, "reprocess_cleared", lambda src, st_, p, mid: calls.append(mid))
+    monkeypatch.setattr(web, "_pipeline", lambda client: None)
+    at = open_suspect(run_app())
+    next(b for b in at.button if b.key == f"pas-fraude-{SUSPECT_ID}").click().run()
+    assert calls == [SUSPECT_ID]
+
+
+def test_suspects_filter(suspect):
+    at = run_app()
+    at.pills(key="filtre_suspects").set_value(["Suspects"]).run()
+    titles = [m.value for m in at.markdown if "Nouveau RIB" in m.value or "Demande de devis pour des" in m.value]
+    assert len(titles) == 1 and "Nouveau RIB" in titles[0]
+
+
+def test_dashboard_shows_fraud_metrics(suspect):
+    at = run_app("app_pages/tableau_de_bord.py")
+    labels = [m.label for m in at.metric]
+    assert "Fraudes bloquées" in labels and "Fausses alertes de fraude" in labels

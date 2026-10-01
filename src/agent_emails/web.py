@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 from agent_emails.connectors.folder import FolderSource
 from agent_emails.models import Category, EmailStatus, InvoiceCheck, Urgency
-from agent_emails.pipeline.runner import Pipeline, PipelineConfig, process_inbox, regenerate_draft
+from agent_emails.pipeline.runner import Pipeline, PipelineConfig, process_inbox, regenerate_draft, reprocess_cleared
 from agent_emails.storage.db import connect
 from agent_emails.storage.repository import EmailStore, StoredEmail
 
@@ -29,9 +29,11 @@ STATUS_LABELS = {
     EmailStatus.TO_CHECK: "❓ À vérifier", EmailStatus.DRAFT_READY: "✉️ Brouillon prêt",
     EmailStatus.TO_IGNORE: "🗑️ À ignorer", EmailStatus.VALIDATED: "✅ Validé",
     EmailStatus.IGNORED: "Ignoré", EmailStatus.ERROR: "⚠️ Erreur",
+    EmailStatus.SUSPECT: "⚠️ Fraude possible", EmailStatus.FRAUD: "⛔ Fraude confirmée",
 }
 INVOICE_ICONS = {"ok": "✅", "anomalie": "⚠️", "a_revoir": "❓"}
-PENDING = {EmailStatus.TO_CHECK, EmailStatus.ERROR, EmailStatus.DRAFT_READY, EmailStatus.TO_IGNORE}
+PENDING = {EmailStatus.TO_CHECK, EmailStatus.ERROR, EmailStatus.DRAFT_READY, EmailStatus.TO_IGNORE,
+           EmailStatus.SUSPECT}
 
 
 _MD_SPECIAL = set("\\`*_{}[]()#+-.!|<>:~$&")
@@ -79,7 +81,8 @@ def _client() -> anthropic.Anthropic | None:
 
 def _pipeline(client) -> Pipeline:
     analyzer = InvoiceAgent(client=client, repo=invoice_repository(), company=company())
-    config = PipelineConfig(company=company(), attachments_dir=_path("AGENT_EMAILS_ATTACHMENTS", "data/pieces_jointes"))
+    config = PipelineConfig(company=company(), company_domain=os.environ.get("COMPANY_DOMAIN", ""),
+                            attachments_dir=_path("AGENT_EMAILS_ATTACHMENTS", "data/pieces_jointes"))
     return Pipeline(client, analyzer, config)
 
 
@@ -116,6 +119,30 @@ def _render_invoice_check(stored: StoredEmail, check: InvoiceCheck, emails: Emai
             st.rerun()
 
 
+def _render_fraud_alert(stored: StoredEmail, emails: EmailStore) -> None:
+    key = stored.message_id
+    lines = [f"- {md_escape(s.message)}" for s in stored.fraud_signals]
+    if stored.fraud_reason:
+        lines.append(f"- Avis de l'agent : {md_escape(stored.fraud_reason)}")
+    st.error("**Fraude possible : aucun traitement n'a été lancé.**\n\n" + "\n".join(lines or ["- Risque élevé."]))
+    if stored.links:
+        st.caption("Liens de l'email (non cliquables) :")
+        st.code("\n".join(f"{link.text} → {link.url}" for link in stored.links), language=None, wrap_lines=True)
+    actions = st.container(horizontal=True)
+    if actions.button("Confirmer la fraude", type="primary", key=f"fraude-{key}"):
+        _close(key, emails, EmailStatus.FRAUD, "fraude_confirmee",
+               {"signaux": [s.code for s in stored.fraud_signals]})
+    if actions.button("Ce n'est pas une fraude", key=f"pas-fraude-{key}"):
+        client = _client()
+        if client:
+            try:
+                reprocess_cleared(source(), emails, _pipeline(client), key)
+            except Exception:
+                st.error("Le traitement de l'email a échoué. Réessaie dans un instant.")
+            else:
+                st.rerun()
+
+
 def render_email_card(stored: StoredEmail, emails: EmailStore) -> None:
     key = stored.message_id
     with st.container(border=True):
@@ -127,6 +154,9 @@ def render_email_card(stored: StoredEmail, emails: EmailStore) -> None:
             if stored.attachments:
                 st.caption("Pièces jointes : " + ", ".join(md_escape(a) for a in stored.attachments))
         with right:
+            if stored.status is EmailStatus.SUSPECT:
+                _render_fraud_alert(stored, emails)
+                return
             if stored.error:
                 st.warning(md_escape(stored.error))
             if stored.category:
@@ -202,7 +232,9 @@ def render_inbox_page() -> None:
         render_email_card(stored, emails)
     chosen = st.pills("Filtrer par catégorie", list(Category), selection_mode="multi",
                       format_func=CATEGORY_LABELS.get, key="filtre_categories")
-    pending = [e for e in emails.list_emails(PENDING) if not chosen or e.category in chosen]
+    only_suspects = st.pills("Alertes", ["Suspects"], selection_mode="multi", key="filtre_suspects")
+    pending = [e for e in emails.list_emails(PENDING)
+               if (not chosen or e.category in chosen) and (not only_suspects or e.status is EmailStatus.SUSPECT)]
     st.caption(f"{len(pending)} email(s) en attente de décision")
     if not pending:
         st.info("Aucun email en attente. Dépose des fichiers .eml dans inbox/ puis clique sur « Relever les emails ».")
@@ -234,6 +266,12 @@ def render_dashboard_page() -> None:
     row.metric("Catégories corrigées", f"{stats.corrected / stats.total:.0%}" if stats.total else "—")
     row.metric("Coût moyen par email", f"{stats.mean_cost_usd:.4f} $")
     row.metric("Temps gagné estimé", f"{decided * minutes / 60:.1f} h")
+    row = st.container(horizontal=True)
+    row.metric("Emails suspects en attente", stats.suspects)
+    row.metric("Fraudes bloquées", stats.fraud_confirmed)
+    alerts = stats.fraud_confirmed + stats.fraud_cleared
+    row.metric("Fausses alertes de fraude", f"{stats.fraud_cleared / alerts:.0%}" if alerts else "—",
+               help="Part des alertes levées par « Ce n'est pas une fraude ».")
     if stats.by_category:
         st.subheader("Emails par catégorie")
         data = pd.DataFrame({"Catégorie": [CATEGORY_LABELS[Category(c)] for c in stats.by_category],
@@ -259,6 +297,10 @@ def render_validated_page() -> None:
 
 def render_ignored_page() -> None:
     _render_decided(EmailStatus.IGNORED, "Aucun email ignoré pour l'instant.")
+
+
+def render_fraud_page() -> None:
+    _render_decided(EmailStatus.FRAUD, "Aucune fraude confirmée pour l'instant.")
 
 
 def render_history_page() -> None:

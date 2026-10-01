@@ -13,6 +13,7 @@ page = st.navigation(
         "Journal": [
             st.Page("app_pages/journal_valides.py", title="Brouillons validés", icon=":material/check_circle:"),
             st.Page("app_pages/journal_ignores.py", title="Ignorés", icon=":material/do_not_disturb_on:"),
+            st.Page("app_pages/journal_fraudes.py", title="Fraudes", icon=":material/gpp_bad:"),
             st.Page("app_pages/journal_historique.py", title="Historique", icon=":material/history:"),
         ],
     },
