@@ -247,3 +247,15 @@ def test_cleared_alert_reprocesses_the_original_email(tmp_path):
 def test_reprocess_cleared_ignores_non_suspect_emails(tmp_path):
     store = EmailStore(connect())
     assert reprocess_cleared(FolderSource(tmp_path, tmp_path), store, pipeline(fraud_client(), tmp_path), "<x@y>") is None
+
+
+def test_process_inbox_uses_extra_domains_for_lookalikes(tmp_path):
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "a.eml").write_bytes(build_eml(message_id="<l@x>", sender="C. Martin <c.martin@hotel-canut.fr>"))
+    config = PipelineConfig(company="Atelier Lumière SAS", attachments_dir=tmp_path / "pj",
+                            extra_domains=("hotel-canuts.fr",))
+    store = EmailStore(connect(tmp_path / "e.db"))
+    results = process_inbox(FolderSource(inbox, tmp_path / "drafts"), store,
+                            Pipeline(fraud_client(category="demande_devis"), None, config))
+    assert results[0].status is EmailStatus.SUSPECT

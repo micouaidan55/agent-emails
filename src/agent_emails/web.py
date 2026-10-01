@@ -81,7 +81,9 @@ def _client() -> anthropic.Anthropic | None:
 
 def _pipeline(client) -> Pipeline:
     analyzer = InvoiceAgent(client=client, repo=invoice_repository(), company=company())
+    extra = tuple(d.strip() for d in os.environ.get("KNOWN_DOMAINS", "").split(",") if d.strip())
     config = PipelineConfig(company=company(), company_domain=os.environ.get("COMPANY_DOMAIN", ""),
+                            extra_domains=extra,
                             attachments_dir=_path("AGENT_EMAILS_ATTACHMENTS", "data/pieces_jointes"))
     return Pipeline(client, analyzer, config)
 

@@ -343,3 +343,15 @@ def test_connect_migrates_an_old_database(tmp_path):
     migrated = EmailStore(connect(str(path)))
     migrated.save_result(result(status=EmailStatus.SUSPECT))
     assert migrated.get("<a@x.fr>").status is EmailStatus.SUSPECT
+
+
+def test_known_senders_merges_extra_domains(store):
+    known = store.known_senders("atelier-lumiere.fr", extra_domains=(" Hotel-Canuts.fr ", "", "bureauplus.fr"))
+    assert known.domains == {"atelier-lumiere.fr", "hotel-canuts.fr", "bureauplus.fr"}
+
+
+def test_fetch_error_does_not_override_a_human_decision(store):
+    store.record_fetch_error("cassé.eml", "Illisible")
+    store.set_status("fichier:cassé.eml", EmailStatus.IGNORED)
+    store.record_fetch_error("cassé.eml", "Illisible encore")
+    assert store.get("fichier:cassé.eml").status is EmailStatus.IGNORED

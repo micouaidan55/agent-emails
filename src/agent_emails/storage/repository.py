@@ -85,7 +85,7 @@ class EmailStore:
         # Normalize received_at to UTC
         received_at_utc = email.received_at.astimezone(timezone.utc).isoformat()
         
-        # Fix 1: Use conditional UPDATE to preserve decided emails
+        # Une décision humaine (validé, ignoré, fraude) n'est jamais écrasée par un retraitement.
         self._conn.execute(
             "INSERT INTO emails (message_id, sender_name, sender_address, subject, received_at, body,"
             " attachments, status, category, urgency, confidence, explanation, summary, extraction, invoice_checks,"
@@ -145,19 +145,22 @@ class EmailStore:
             self._conn.execute("INSERT OR IGNORE INTO trusted_senders (value) VALUES (?)", (key,))
             self._conn.commit()
 
-    def known_senders(self, company_domain: str = "") -> KnownSenders:
+    def known_senders(self, company_domain: str = "", extra_domains: tuple[str, ...] = ()) -> KnownSenders:
         values = {row["value"] for row in self._conn.execute("SELECT value FROM trusted_senders")}
         values |= {trust_key(row["sender_address"])
                    for row in self._conn.execute("SELECT sender_address FROM emails WHERE status = 'valide'")}
         if company_domain:
             values.add(company_domain.strip().lower())
+        values |= {d.strip().lower() for d in extra_domains}
         values.discard("")
         return KnownSenders(domains=frozenset(v for v in values if "@" not in v),
                             addresses=frozenset(v for v in values if "@" in v))
 
     def record_fetch_error(self, filename: str, message: str) -> None:
         self._conn.execute(
-            "INSERT OR REPLACE INTO emails (message_id, subject, received_at, status, error) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO emails (message_id, subject, received_at, status, error) VALUES (?, ?, ?, ?, ?)"
+            " ON CONFLICT(message_id) DO UPDATE SET error = excluded.error, received_at = excluded.received_at"
+            " WHERE emails.status NOT IN ('valide', 'ignore', 'fraude')",
             (f"fichier:{filename}", filename, datetime.now(timezone.utc).isoformat(), EmailStatus.ERROR.value, message),
         )
         self._conn.commit()
@@ -198,12 +201,10 @@ class EmailStore:
         if field not in CORRECTABLE_FIELDS:
             raise ValueError(f"Champ non corrigeable : {field}")
         
-        # Fix 4: Check if message_id exists
         row = self._conn.execute(f"SELECT {field} FROM emails WHERE message_id = ?", (message_id,)).fetchone()
         if row is None:
             raise ValueError(f"Email non trouvé : {message_id}")
         
-        # Fix 3: Validate enum values
         if field == "category":
             try:
                 Category(new_value)
@@ -215,7 +216,6 @@ class EmailStore:
             except ValueError:
                 raise ValueError(f"Urgence invalide : {new_value}")
         
-        # Only now insert and update
         self._conn.execute(
             "INSERT INTO corrections (message_id, field, old_value, new_value) VALUES (?, ?, ?, ?)",
             (message_id, field, row[field] if row else None, new_value),
@@ -247,7 +247,7 @@ class EmailStore:
         mean_cost = self._conn.execute(
             "SELECT AVG(cost_usd) FROM emails WHERE status != 'erreur' OR category IS NOT NULL"
         ).fetchone()[0]
-        # Fix 2: Only count distinct message_ids with category corrections
+        # Un email corrigé plusieurs fois ne compte qu'une fois.
         corrected = self._conn.execute("SELECT COUNT(DISTINCT message_id) FROM corrections WHERE field = 'category'").fetchone()[0]
         return Stats(
             total=count(""),

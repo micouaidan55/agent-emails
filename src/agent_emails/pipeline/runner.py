@@ -28,6 +28,7 @@ class PipelineConfig:
     extraction_model: str = EXTRACTION_MODEL
     draft_model: str = DRAFT_MODEL
     company_domain: str = ""
+    extra_domains: tuple[str, ...] = ()
 
 
 class Pipeline:
@@ -111,7 +112,7 @@ def process_inbox(
     fetched = source.fetch_new(store.known_ids())
     for filename, message in fetched.errors:
         store.record_fetch_error(filename, message)
-    known = store.known_senders(pipeline.config.company_domain)
+    known = store.known_senders(pipeline.config.company_domain, pipeline.config.extra_domains)
     results = []
     for email in fetched.emails:
         try:
@@ -135,7 +136,7 @@ def reprocess_cleared(source: MailSource, store: EmailStore, pipeline: Pipeline,
     store.log(message_id, "fraude_levee", {"expediteur": stored.sender_address})
     fetched = source.fetch_new(store.known_ids() - {message_id})
     email = next((e for e in fetched.emails if e.message_id == message_id), None) or stored.to_email()
-    result = pipeline.process(email, known=store.known_senders(pipeline.config.company_domain), check_fraud=False)
+    result = pipeline.process(email, known=store.known_senders(pipeline.config.company_domain, pipeline.config.extra_domains), check_fraud=False)
     _save_and_log(store, result)
     return result
 
