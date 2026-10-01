@@ -32,9 +32,9 @@ def check_invoices(email: Email, analyzer: InvoiceAnalyzer, workdir: Path) -> li
             name = f"{stem}_{counter}{suffix}"
             counter += 1
         written_names.add(name)
+        path = folder / name
         try:
             folder.mkdir(parents=True, exist_ok=True)
-            path = folder / name
             path.write_bytes(attachment.data)
             result = analyzer.process(path)
         except Exception as exc:
