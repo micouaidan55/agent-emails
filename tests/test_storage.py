@@ -271,3 +271,75 @@ def test_known_ids_excludes_emails_in_error_so_they_are_retried(store):
     store.save_result(ok)
     store.save_result(failed)
     assert store.known_ids() == {"<ok@x.fr>"}
+
+
+from agent_emails.models import FraudRisk, FraudSeverity, FraudSignal, Link
+
+
+def test_fraud_fields_roundtrip(store):
+    signal = FraudSignal(code="lien_trompeur", severity=FraudSeverity.STRONG, message="Lien trompeur.")
+    r = result(status=EmailStatus.SUSPECT, fraud_signals=[signal])
+    r.email.reply_to = "paiement@ailleurs.com"
+    r.email.links = [Link(text="www.banque.fr", url="http://voleur.xyz")]
+    r.triage.fraud_risk = FraudRisk.HIGH
+    r.triage.fraud_reason = "Changement de RIB."
+    store.save_result(r)
+    stored = store.get("<a@x.fr>")
+    assert stored.status is EmailStatus.SUSPECT
+    assert stored.fraud_signals == [signal]
+    assert stored.fraud_risk == "eleve" and stored.fraud_reason == "Changement de RIB."
+    assert stored.reply_to == "paiement@ailleurs.com"
+    assert stored.to_email().links == [Link(text="www.banque.fr", url="http://voleur.xyz")]
+
+
+def test_suspects_come_first(store):
+    store.save_result(result(message_id="<a@x.fr>", status=EmailStatus.TO_CHECK, urgency="haute"))
+    store.save_result(result(message_id="<b@x.fr>", status=EmailStatus.SUSPECT, urgency="basse"))
+    assert [e.message_id for e in store.list_emails()][0] == "<b@x.fr>"
+
+
+def test_confirmed_fraud_is_never_overwritten(store):
+    store.save_result(result(status=EmailStatus.SUSPECT))
+    store.set_status("<a@x.fr>", EmailStatus.FRAUD)
+    store.save_result(result(status=EmailStatus.DRAFT_READY))
+    assert store.get("<a@x.fr>").status is EmailStatus.FRAUD
+
+
+def test_known_senders(store):
+    store.save_result(EmailResult(email=make_email(message_id="<v@x.fr>", sender_address="a@client.fr"),
+                                  status=EmailStatus.DRAFT_READY))
+    store.set_status("<v@x.fr>", EmailStatus.VALIDATED)
+    store.save_result(EmailResult(email=make_email(message_id="<p@x.fr>", sender_address="p@pending.fr"),
+                                  status=EmailStatus.DRAFT_READY))
+    store.trust_sender("Artisan.Dupuis@Gmail.com")
+    store.trust_sender("compta@fournisseur.fr")
+    known = store.known_senders("atelier-lumiere.fr")
+    assert known.domains == {"atelier-lumiere.fr", "client.fr", "fournisseur.fr"}
+    assert known.addresses == {"artisan.dupuis@gmail.com"}
+
+
+def test_fraud_stats(store):
+    store.save_result(result(message_id="<a@x.fr>", status=EmailStatus.SUSPECT))
+    store.save_result(result(message_id="<b@x.fr>", status=EmailStatus.SUSPECT))
+    store.set_status("<b@x.fr>", EmailStatus.FRAUD)
+    store.log("<c@x.fr>", "fraude_levee")
+    stats = store.stats()
+    assert (stats.suspects, stats.fraud_confirmed, stats.fraud_cleared) == (1, 1, 1)
+
+
+def test_connect_migrates_an_old_database(tmp_path):
+    import sqlite3
+    path = tmp_path / "old.db"
+    old = sqlite3.connect(path)
+    old.execute("CREATE TABLE emails (message_id TEXT PRIMARY KEY, sender_name TEXT NOT NULL DEFAULT '',"
+                " sender_address TEXT NOT NULL DEFAULT '', subject TEXT NOT NULL DEFAULT '', received_at TEXT NOT NULL,"
+                " body TEXT NOT NULL DEFAULT '', attachments TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL,"
+                " category TEXT, urgency TEXT, confidence REAL, explanation TEXT, summary TEXT, extraction TEXT,"
+                " invoice_checks TEXT NOT NULL DEFAULT '[]', draft TEXT, draft_original TEXT, error TEXT,"
+                " cost_usd REAL NOT NULL DEFAULT 0, seconds REAL NOT NULL DEFAULT 0,"
+                " processed_at TEXT NOT NULL DEFAULT (datetime('now')), decided_at TEXT)")
+    old.commit()
+    old.close()
+    migrated = EmailStore(connect(str(path)))
+    migrated.save_result(result(status=EmailStatus.SUSPECT))
+    assert migrated.get("<a@x.fr>").status is EmailStatus.SUSPECT

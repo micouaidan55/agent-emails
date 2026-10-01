@@ -10,6 +10,7 @@ import anthropic
 from agent_emails.connectors.base import MailSource
 from agent_emails.models import Category, Email, EmailResult, EmailStatus, Triage, Usage
 from agent_emails.pipeline.drafting import draft_reply
+from agent_emails.pipeline.fraud import KnownSenders, fraud_signals, is_suspicious
 from agent_emails.pipeline.extraction import extract_info
 from agent_emails.pipeline.invoices import InvoiceAnalyzer, check_invoices
 from agent_emails.pipeline.llm import DRAFT_MODEL, EXTRACTION_MODEL, TRIAGE_MODEL, StepError
@@ -26,6 +27,7 @@ class PipelineConfig:
     triage_model: str = TRIAGE_MODEL
     extraction_model: str = EXTRACTION_MODEL
     draft_model: str = DRAFT_MODEL
+    company_domain: str = ""
 
 
 class Pipeline:
@@ -34,15 +36,25 @@ class Pipeline:
         self.analyzer = analyzer
         self.config = config
 
-    def process(self, email: Email) -> EmailResult:
+    def process(self, email: Email, known: KnownSenders | None = None, check_fraud: bool = True) -> EmailResult:
         started = time.perf_counter()
         usage = Usage()
         triage = None
         extraction = None
         checks = []
+        if known is None:
+            domain = self.config.company_domain.strip().lower()
+            known = KnownSenders(domains=frozenset({domain} - {""}))
+        signals = fraud_signals(email, known)
+
+        def blocked(risk) -> bool:
+            return check_fraud and is_suspicious(signals, risk)
+
         try:
-            triage, step = triage_email(self.client, email, self.config.company, self.config.triage_model)
+            triage, step = triage_email(self.client, email, self.config.company, self.config.triage_model, signals)
             usage += step
+            if blocked(triage.fraud_risk):
+                return self._result(email, EmailStatus.SUSPECT, started, usage, triage, signals=signals)
             draft = None
             if triage.category is not Category.PROSPECTING:
                 info, step = extract_info(self.client, email, triage.category, self.config.company,
@@ -61,21 +73,35 @@ class Pipeline:
                 status = EmailStatus.TO_IGNORE
             else:
                 status = EmailStatus.DRAFT_READY
-            return self._result(email, status, started, usage, triage, extraction, checks, draft)
+            return self._result(email, status, started, usage, triage, extraction, checks, draft, signals=signals)
         except StepError as exc:
             usage += exc.usage
-            return self._result(email, EmailStatus.TO_CHECK, started, usage, triage, extraction, checks,
-                                error=f"Analyse incomplète : {exc}")
+            status = EmailStatus.SUSPECT if blocked(triage.fraud_risk if triage else None) else EmailStatus.TO_CHECK
+            return self._result(email, status, started, usage, triage, extraction, checks,
+                                error=f"Analyse incomplète : {exc}", signals=signals)
         except anthropic.APIError as exc:
-            return self._result(email, EmailStatus.ERROR, started, usage, triage, extraction, checks,
-                                error=f"Erreur d'API Claude ({type(exc).__name__}) : {exc}")
+            status = EmailStatus.SUSPECT if blocked(triage.fraud_risk if triage else None) else EmailStatus.ERROR
+            return self._result(email, status, started, usage, triage, extraction, checks,
+                                error=f"Erreur d'API Claude ({type(exc).__name__}) : {exc}", signals=signals)
 
     @staticmethod
-    def _result(email, status, started, usage, triage=None, extraction=None, checks=(), draft=None, error=None):
+    def _result(email, status, started, usage, triage=None, extraction=None, checks=(), draft=None, error=None,
+                signals=()):
         return EmailResult(
             email=email, status=status, triage=triage, extraction=extraction, invoice_checks=list(checks),
             draft=draft, error=error, usage=usage, seconds=time.perf_counter() - started,
+            fraud_signals=list(signals),
         )
+
+
+def _save_and_log(store: EmailStore, result: EmailResult) -> None:
+    store.save_result(result)
+    store.log(result.email.message_id, "analyse", {
+        "statut": result.status.value,
+        "categorie": result.triage.category.value if result.triage else None,
+        "signaux": [s.code for s in result.fraud_signals],
+        "cout_usd": round(result.usage.cost_usd, 5),
+    })
 
 
 def process_inbox(
@@ -85,23 +111,33 @@ def process_inbox(
     fetched = source.fetch_new(store.known_ids())
     for filename, message in fetched.errors:
         store.record_fetch_error(filename, message)
+    known = store.known_senders(pipeline.config.company_domain)
     results = []
     for email in fetched.emails:
         try:
-            result = pipeline.process(email)
+            result = pipeline.process(email, known=known)
         except Exception as exc:
             result = Pipeline._result(email, EmailStatus.ERROR, time.perf_counter(), Usage(),
                                       error=f"Erreur inattendue : {exc}")
-        store.save_result(result)
-        store.log(email.message_id, "analyse", {
-            "statut": result.status.value,
-            "categorie": result.triage.category.value if result.triage else None,
-            "cout_usd": round(result.usage.cost_usd, 5),
-        })
+        _save_and_log(store, result)
         results.append(result)
         if on_result:
             on_result(result)
     return results
+
+
+def reprocess_cleared(source: MailSource, store: EmailStore, pipeline: Pipeline, message_id: str) -> EmailResult | None:
+    """« Ce n'est pas une fraude » : l'expéditeur devient de confiance et le traitement normal reprend."""
+    stored = store.get(message_id)
+    if stored is None or stored.status is not EmailStatus.SUSPECT:
+        return None
+    store.trust_sender(stored.sender_address)
+    store.log(message_id, "fraude_levee", {"expediteur": stored.sender_address})
+    fetched = source.fetch_new(store.known_ids() - {message_id})
+    email = next((e for e in fetched.emails if e.message_id == message_id), None) or stored.to_email()
+    result = pipeline.process(email, known=store.known_senders(pipeline.config.company_domain), check_fraud=False)
+    _save_and_log(store, result)
+    return result
 
 
 def regenerate_draft(client, stored: StoredEmail, company: str, model: str = DRAFT_MODEL) -> tuple[str | None, Usage]:

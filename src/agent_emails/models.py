@@ -38,6 +38,8 @@ class EmailStatus(StrEnum):
     VALIDATED = "valide"
     IGNORED = "ignore"
     ERROR = "erreur"
+    SUSPECT = "suspect"
+    FRAUD = "fraude"
 
 
 class FraudRisk(StrEnum):
@@ -86,6 +88,8 @@ class Triage(BaseModel):
     confidence: float = Field(description="Confiance dans la catégorie, entre 0 et 1.")
     explanation: str = Field(description="Une phrase qui justifie la catégorie et l'urgence.")
     summary: str = Field(description="Résumé de l'email en moins de 15 mots.")
+    fraud_risk: FraudRisk = Field(default=FraudRisk.NONE, description="Risque que l'email soit une fraude : aucun, faible ou eleve.")
+    fraud_reason: str = Field(default="", description="Une phrase en français qui justifie le risque de fraude.")
 
 
 class Contact(BaseModel):
@@ -167,6 +171,7 @@ class EmailResult(BaseModel):
     error: str | None = None
     usage: Usage = Field(default_factory=Usage)
     seconds: float = 0.0
+    fraud_signals: list[FraudSignal] = Field(default_factory=list)
 
 
 def render_email(email: Email) -> str:

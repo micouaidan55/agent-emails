@@ -74,3 +74,25 @@ def test_extraction_system_has_no_leftover_placeholders():
     formatted = EXTRACTION_SYSTEM.format(company="Test", category="demande_devis")
     assert "{company}" not in formatted
     assert "{category}" not in formatted
+
+
+from agent_emails.models import FraudRisk, FraudSeverity, FraudSignal
+
+
+def test_triage_sends_fraud_signals_and_reads_the_risk():
+    triage = Triage(category="facture", urgency="haute", confidence=0.9, explanation="E.", summary="S",
+                    fraud_risk="eleve", fraud_reason="Changement de RIB inattendu.")
+    client = FakeClient([reply(triage)])
+    signal = FraudSignal(code="domaine_sosie", severity=FraudSeverity.STRONG, message="Le domaine x.fr imite y.fr.")
+    result, _ = triage_email(client, make_email(), "Atelier Lumière SAS", signals=[signal])
+    content = client.messages.calls[0]["messages"][0]["content"]
+    assert "<signaux>" in content and "Le domaine x.fr imite y.fr." in content
+    assert "fraud_risk" in client.messages.calls[0]["system"]
+    assert result.fraud_risk is FraudRisk.HIGH
+
+
+def test_triage_without_signals_sends_no_signal_block():
+    client = FakeClient([reply(Triage(category="information", urgency="basse", confidence=0.9,
+                                      explanation="E.", summary="S"))])
+    triage_email(client, make_email(), "Atelier Lumière SAS")
+    assert "<signaux>" not in client.messages.calls[0]["messages"][0]["content"]

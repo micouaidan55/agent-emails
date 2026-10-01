@@ -7,12 +7,13 @@ from datetime import datetime, timezone
 from pydantic import BaseModel
 
 from agent_emails.models import (
-    Attachment, Category, Email, EmailResult, EmailStatus, InvoiceCheck, Urgency,
+    Attachment, Category, Email, EmailResult, EmailStatus, FraudRisk, FraudSignal, InvoiceCheck, Link, Urgency,
 )
+from agent_emails.pipeline.fraud import KnownSenders, trust_key
 
 CORRECTABLE_FIELDS = {"category", "urgency"}
 _ORDER = """
-ORDER BY CASE WHEN status IN ('a_verifier', 'erreur') THEN 0 ELSE 1 END,
+ORDER BY CASE WHEN status = 'suspect' THEN 0 WHEN status IN ('a_verifier', 'erreur') THEN 1 ELSE 2 END,
          CASE urgency WHEN 'haute' THEN 0 WHEN 'normale' THEN 1 WHEN 'basse' THEN 2 ELSE 3 END,
          received_at DESC
 """
@@ -39,6 +40,11 @@ class StoredEmail(BaseModel):
     error: str | None
     cost_usd: float
     seconds: float
+    reply_to: str = ""
+    links: list[Link] = []
+    fraud_risk: FraudRisk | None = None
+    fraud_reason: str | None = None
+    fraud_signals: list[FraudSignal] = []
 
     def to_email(self) -> Email:
         return Email(
@@ -49,6 +55,8 @@ class StoredEmail(BaseModel):
             received_at=self.received_at,
             body=self.body,
             attachments=[Attachment(filename=name, content_type="application/octet-stream") for name in self.attachments],
+            reply_to=self.reply_to,
+            links=self.links,
         )
 
 
@@ -63,6 +71,9 @@ class Stats(BaseModel):
     ignored: int
     corrected: int
     mean_cost_usd: float
+    suspects: int
+    fraud_confirmed: int
+    fraud_cleared: int
 
 
 class EmailStore:
@@ -78,7 +89,8 @@ class EmailStore:
         self._conn.execute(
             "INSERT INTO emails (message_id, sender_name, sender_address, subject, received_at, body,"
             " attachments, status, category, urgency, confidence, explanation, summary, extraction, invoice_checks,"
-            " draft, draft_original, error, cost_usd, seconds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            " draft, draft_original, error, cost_usd, seconds, reply_to, links, fraud_risk, fraud_reason, fraud_signals)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             " ON CONFLICT(message_id) DO UPDATE SET"
             " sender_name = excluded.sender_name,"
             " sender_address = excluded.sender_address,"
@@ -98,8 +110,13 @@ class EmailStore:
             " draft_original = excluded.draft_original,"
             " error = excluded.error,"
             " cost_usd = excluded.cost_usd,"
-            " seconds = excluded.seconds"
-            " WHERE emails.status NOT IN ('valide', 'ignore')",
+            " seconds = excluded.seconds,"
+            " reply_to = excluded.reply_to,"
+            " links = excluded.links,"
+            " fraud_risk = excluded.fraud_risk,"
+            " fraud_reason = excluded.fraud_reason,"
+            " fraud_signals = excluded.fraud_signals"
+            " WHERE emails.status NOT IN ('valide', 'ignore', 'fraude')",
             (
                 email.message_id, email.sender_name, email.sender_address, email.subject,
                 received_at_utc, email.body,
@@ -113,9 +130,30 @@ class EmailStore:
                 json.dumps(result.extraction, ensure_ascii=False) if result.extraction is not None else None,
                 json.dumps([c.model_dump(mode="json") for c in result.invoice_checks], ensure_ascii=False),
                 result.draft, result.draft, result.error, result.usage.cost_usd, result.seconds,
+                email.reply_to,
+                json.dumps([link.model_dump() for link in email.links], ensure_ascii=False),
+                triage.fraud_risk.value if triage else None,
+                triage.fraud_reason if triage else None,
+                json.dumps([s.model_dump(mode="json") for s in result.fraud_signals], ensure_ascii=False),
             ),
         )
         self._conn.commit()
+
+    def trust_sender(self, address: str) -> None:
+        key = trust_key(address)
+        if key:
+            self._conn.execute("INSERT OR IGNORE INTO trusted_senders (value) VALUES (?)", (key,))
+            self._conn.commit()
+
+    def known_senders(self, company_domain: str = "") -> KnownSenders:
+        values = {row["value"] for row in self._conn.execute("SELECT value FROM trusted_senders")}
+        values |= {trust_key(row["sender_address"])
+                   for row in self._conn.execute("SELECT sender_address FROM emails WHERE status = 'valide'")}
+        if company_domain:
+            values.add(company_domain.strip().lower())
+        values.discard("")
+        return KnownSenders(domains=frozenset(v for v in values if "@" not in v),
+                            addresses=frozenset(v for v in values if "@" in v))
 
     def record_fetch_error(self, filename: str, message: str) -> None:
         self._conn.execute(
@@ -148,7 +186,7 @@ class EmailStore:
         self._conn.commit()
 
     def set_status(self, message_id: str, status: EmailStatus) -> None:
-        decided = status in (EmailStatus.VALIDATED, EmailStatus.IGNORED)
+        decided = status in (EmailStatus.VALIDATED, EmailStatus.IGNORED, EmailStatus.FRAUD)
         self._conn.execute(
             "UPDATE emails SET status = ?, decided_at = CASE WHEN ? THEN datetime('now') ELSE decided_at END"
             " WHERE message_id = ?",
@@ -222,6 +260,10 @@ class EmailStore:
             ignored=count("WHERE status = 'ignore'"),
             corrected=corrected,
             mean_cost_usd=mean_cost or 0.0,
+            suspects=count("WHERE status = 'suspect'"),
+            fraud_confirmed=count("WHERE status = 'fraude'"),
+            fraud_cleared=self._conn.execute(
+                "SELECT COUNT(DISTINCT message_id) FROM action_log WHERE action = 'fraude_levee'").fetchone()[0],
         )
 
     def _select(self, where: str, params: tuple) -> list[StoredEmail]:
@@ -248,6 +290,11 @@ class EmailStore:
                 error=row["error"],
                 cost_usd=row["cost_usd"],
                 seconds=row["seconds"],
+                reply_to=row["reply_to"],
+                links=json.loads(row["links"]),
+                fraud_risk=row["fraud_risk"],
+                fraud_reason=row["fraud_reason"],
+                fraud_signals=[FraudSignal.model_validate(s) for s in json.loads(row["fraud_signals"])],
             )
             for row in rows
         ]

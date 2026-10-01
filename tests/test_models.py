@@ -17,7 +17,7 @@ def test_enum_values_match_the_spec():
     ]
     assert [u.value for u in Urgency] == ["haute", "normale", "basse"]
     assert [s.value for s in EmailStatus] == [
-        "a_verifier", "brouillon_pret", "a_ignorer", "valide", "ignore", "erreur",
+        "a_verifier", "brouillon_pret", "a_ignorer", "valide", "ignore", "erreur", "suspect", "fraude",
     ]
 
 

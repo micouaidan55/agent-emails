@@ -154,3 +154,96 @@ def test_unexpected_exception_does_not_stop_the_inbox(tmp_path):
     assert [r.status for r in results] == [EmailStatus.ERROR, EmailStatus.DRAFT_READY]
     assert "boum" in results[0].error
     assert store.get("<1@x>").status is EmailStatus.ERROR
+
+
+from agent_emails.models import FraudRisk, Link
+from agent_emails.pipeline.fraud import KnownSenders
+from agent_emails.pipeline.runner import reprocess_cleared
+
+
+def fraud_client(category="facture", risk="aucun"):
+    triage = Triage(category=category, urgency="haute", confidence=0.9, explanation="E.", summary="S",
+                    fraud_risk=risk, fraud_reason="Raison.")
+
+    def respond(kwargs):
+        model = kwargs["output_format"]
+        return reply(triage if model is Triage else OUTPUTS[model], input_tokens=1000, output_tokens=100)
+
+    return FakeClient(respond)
+
+
+class FailingAnalyzer:
+    def process(self, path):
+        raise AssertionError("une facture suspecte ne doit pas être analysée")
+
+
+KNOWN = KnownSenders(domains=frozenset({"hotel-canuts.fr"}))
+
+
+def test_high_risk_from_the_model_stops_the_pipeline(tmp_path):
+    client = fraud_client(risk="eleve")
+    result = pipeline(client, tmp_path, FailingAnalyzer()).process(
+        make_email(attachments=[pdf_attachment()]), known=KNOWN)
+    assert result.status is EmailStatus.SUSPECT
+    assert result.extraction is None and result.draft is None and result.invoice_checks == []
+    assert len(client.messages.calls) == 1
+    assert result.triage.fraud_risk is FraudRisk.HIGH
+
+
+def test_strong_signal_alone_stops_the_pipeline(tmp_path):
+    client = fraud_client()
+    result = pipeline(client, tmp_path).process(make_email(sender_address="c.martin@hotel-canut.fr"), known=KNOWN)
+    assert result.status is EmailStatus.SUSPECT
+    assert [s.code for s in result.fraud_signals] == ["domaine_sosie"]
+
+
+def test_one_weak_signal_does_not_block(tmp_path):
+    client = fraud_client(category="demande_devis")
+    result = pipeline(client, tmp_path).process(make_email(reply_to="autre@ailleurs.fr"), known=KNOWN)
+    assert result.status is EmailStatus.DRAFT_READY
+    assert [s.code for s in result.fraud_signals] == ["reponse_ailleurs"]
+
+
+def test_signals_still_protect_when_the_api_fails(tmp_path):
+    request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+    client = FakeClient([anthropic.APIConnectionError(request=request)])
+    email = make_email(links=[Link(text="www.banque.fr", url="http://voleur.xyz")])
+    result = pipeline(client, tmp_path).process(email, known=KNOWN)
+    assert result.status is EmailStatus.SUSPECT
+
+
+def test_check_fraud_false_processes_normally(tmp_path):
+    client = fraud_client(category="demande_devis", risk="eleve")
+    result = pipeline(client, tmp_path).process(make_email(), known=KNOWN, check_fraud=False)
+    assert result.status is EmailStatus.DRAFT_READY
+    assert result.draft == "Bonjour Claire,"
+
+
+def test_company_domain_is_known_by_default(tmp_path):
+    client = fraud_client(category="demande_devis")
+    p = Pipeline(client, None, PipelineConfig(company="Atelier Lumière SAS", attachments_dir=tmp_path,
+                                             company_domain="atelier-lumiere.fr"))
+    result = p.process(make_email(sender_address="direction@atelier-lumiere.co"))
+    assert result.status is EmailStatus.SUSPECT
+
+
+def test_cleared_alert_reprocesses_the_original_email(tmp_path):
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    (inbox / "a.eml").write_bytes(build_eml(message_id="<a@x.fr>", sender="Bob <bob@nouveau-client.fr>",
+                                            reply_to="compta@ailleurs.fr", body="Nouveau RIB : merci d'en tenir compte."))
+    store = EmailStore(connect())
+    source = FolderSource(inbox, tmp_path / "drafts")
+    p = pipeline(fraud_client(category="demande_devis"), tmp_path)
+    [first] = process_inbox(source, store, p)
+    assert first.status is EmailStatus.SUSPECT
+    result = reprocess_cleared(source, store, p, "<a@x.fr>")
+    assert result.status is EmailStatus.DRAFT_READY
+    assert store.get("<a@x.fr>").status is EmailStatus.DRAFT_READY
+    assert "nouveau-client.fr" in store.known_senders().domains
+    assert [e["action"] for e in store.list_log()][:2] == ["analyse", "fraude_levee"]
+
+
+def test_reprocess_cleared_ignores_non_suspect_emails(tmp_path):
+    store = EmailStore(connect())
+    assert reprocess_cleared(FolderSource(tmp_path, tmp_path), store, pipeline(fraud_client(), tmp_path), "<x@y>") is None
