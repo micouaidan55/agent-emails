@@ -1,0 +1,806 @@
+{
+  "today": "2026-09-29",
+  "known_domains": [
+    "atelier-lumiere.fr",
+    "hotel-canuts.fr",
+    "bureauplus.fr",
+    "imprimerie-dupont.fr",
+    "transports-martin.fr"
+  ],
+  "emails": [
+    {
+      "file": "01_devis_suspensions.eml",
+      "message_id": "<01.devis_suspensions@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Claire Martin",
+        "contact.company": "Hôtel des Canuts",
+        "quantity": "12",
+        "product_or_service": "suspension"
+      },
+      "must_mention": [
+        "Martin",
+        "suspension"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "02_devis_restaurant.eml",
+      "message_id": "<02.devis_restaurant@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Julien Roche",
+        "budget": "6 000",
+        "product_or_service": "éclairage"
+      },
+      "must_mention": [
+        "Roche",
+        "éclairage"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "03_devis_question.eml",
+      "message_id": "<03.devis_question@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Sophie Leroy",
+        "quantity": "3",
+        "product_or_service": "applique"
+      },
+      "must_mention": [
+        "Leroy",
+        "applique"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "04_devis_urgent.eml",
+      "message_id": "<04.devis_urgent@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "haute",
+      "fraud": false,
+      "fields": {
+        "contact.company": "Galerie Nova",
+        "desired_date": "8 octobre"
+      },
+      "must_mention": [
+        "Petit",
+        "rail"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "05_devis_bureaux.eml",
+      "message_id": "<05.devis_bureaux@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Nadia Benali",
+        "contact.company": "Benali",
+        "quantity": "6"
+      },
+      "must_mention": [
+        "Benali"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "06_devis_anglais.eml",
+      "message_id": "<06.devis_anglais@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Tom Walsh",
+        "quantity": "20"
+      },
+      "must_mention": [
+        "Walsh"
+      ],
+      "draft_expected": true,
+      "lang": "en",
+      "attachments": []
+    },
+    {
+      "file": "07_devis_html.eml",
+      "message_id": "<07.devis_html@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Garnier",
+        "quantity": "2",
+        "product_or_service": "lampadaire"
+      },
+      "must_mention": [
+        "Garnier"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "08_devis_relance.eml",
+      "message_id": "<08.devis_relance@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "haute",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Pierre Faure",
+        "product_or_service": "vitrine"
+      },
+      "must_mention": [
+        "Faure",
+        "vitrine"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "09_recl_casse.eml",
+      "message_id": "<09.recl_casse@eval.atelier-lumiere.fr>",
+      "category": "reclamation",
+      "urgency": "haute",
+      "fraud": false,
+      "fields": {
+        "order_reference": "CMD-2291",
+        "expectation": "remplacement"
+      },
+      "must_mention": [
+        "CMD-2291",
+        "Simon"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "10_recl_polie_urgente.eml",
+      "message_id": "<10.recl_polie_urgente@eval.atelier-lumiere.fr>",
+      "category": "reclamation",
+      "urgency": "haute",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Henri Blanc",
+        "problem": "clignot"
+      },
+      "must_mention": [
+        "Blanc",
+        "applique"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "11_recl_retard.eml",
+      "message_id": "<11.recl_retard@eval.atelier-lumiere.fr>",
+      "category": "reclamation",
+      "urgency": "haute",
+      "fraud": false,
+      "fields": {
+        "order_reference": "CMD-2305"
+      },
+      "must_mention": [
+        "CMD-2305",
+        "Morel"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "12_recl_facture.eml",
+      "message_id": "<12.recl_facture@eval.atelier-lumiere.fr>",
+      "category": "reclamation",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "order_reference": "AL-2026-083"
+      },
+      "must_mention": [
+        "AL-2026-083"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "13_recl_colere.eml",
+      "message_id": "<13.recl_colere@eval.atelier-lumiere.fr>",
+      "category": "reclamation",
+      "urgency": "haute",
+      "fraud": false,
+      "fields": {
+        "order_reference": "CMD-2210"
+      },
+      "must_mention": [
+        "CMD-2210"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "14_recl_garantie.eml",
+      "message_id": "<14.recl_garantie@eval.atelier-lumiere.fr>",
+      "category": "reclamation",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Anne Roux",
+        "problem": "allume"
+      },
+      "must_mention": [
+        "Roux",
+        "garantie"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "15_recl_finition.eml",
+      "message_id": "<15.recl_finition@eval.atelier-lumiere.fr>",
+      "category": "reclamation",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "order_reference": "CMD-2318",
+        "expectation": "échange"
+      },
+      "must_mention": [
+        "CMD-2318",
+        "Bernard"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "16_fact_bureau_plus.eml",
+      "message_id": "<16.fact_bureau_plus@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "supplier": "Bureau Plus",
+        "invoice_number": "F-2026-190"
+      },
+      "must_mention": [
+        "F-2026-190"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": [
+        {
+          "file": "F-2026-190.pdf",
+          "expected_status": "ok"
+        }
+      ]
+    },
+    {
+      "file": "17_fact_dupont.eml",
+      "message_id": "<17.fact_dupont@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "supplier": "Dupont",
+        "invoice_number": "4820"
+      },
+      "must_mention": [
+        "4820"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": [
+        {
+          "file": "facture_4820.pdf",
+          "expected_status": "ok"
+        }
+      ]
+    },
+    {
+      "file": "18_fact_technet_tva.eml",
+      "message_id": "<18.fact_technet_tva@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "supplier": "TechNet",
+        "invoice_number": "TN-960"
+      },
+      "must_mention": [
+        "TN-960",
+        "rectificative"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": [
+        {
+          "file": "TN-960.pdf",
+          "expected_status": "anomalie"
+        }
+      ]
+    },
+    {
+      "file": "19_fact_martin.eml",
+      "message_id": "<19.fact_martin@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "supplier": "Transports Martin",
+        "invoice_number": "TM/26/061"
+      },
+      "must_mention": [
+        "TM/26/061"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": [
+        {
+          "file": "TM-26-061.pdf",
+          "expected_status": "ok"
+        }
+      ]
+    },
+    {
+      "file": "20_fact_electricite.eml",
+      "message_id": "<20.fact_electricite@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "supplier": "Électricité Lyon Pro",
+        "invoice_number": "EL-5561"
+      },
+      "must_mention": [
+        "EL-5561"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": [
+        {
+          "file": "EL-5561.pdf",
+          "expected_status": "ok"
+        }
+      ]
+    },
+    {
+      "file": "21_fact_sans_pj.eml",
+      "message_id": "<21.fact_sans_pj@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "supplier": "Nordic Lamps",
+        "invoice_number": "INV-21044"
+      },
+      "must_mention": [
+        "INV-21044"
+      ],
+      "draft_expected": true,
+      "lang": "en",
+      "attachments": []
+    },
+    {
+      "file": "22_fact_relance.eml",
+      "message_id": "<22.fact_relance@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "haute",
+      "fraud": false,
+      "fields": {
+        "invoice_number": "4755"
+      },
+      "must_mention": [
+        "4755"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "23_rdv_showroom.eml",
+      "message_id": "<23.rdv_showroom@eval.atelier-lumiere.fr>",
+      "category": "rendez_vous",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Nicolas Garcia",
+        "proposed_slots": "1er octobre"
+      },
+      "must_mention": [
+        "Garcia"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "24_rdv_chantier.eml",
+      "message_id": "<24.rdv_chantier@eval.atelier-lumiere.fr>",
+      "category": "rendez_vous",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Emma Lefèvre",
+        "proposed_slots": "6 octobre"
+      },
+      "must_mention": [
+        "Lefèvre",
+        "chantier"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "25_rdv_panne.eml",
+      "message_id": "<25.rdv_panne@eval.atelier-lumiere.fr>",
+      "category": "rendez_vous",
+      "urgency": "haute",
+      "fraud": false,
+      "fields": {
+        "contact.company": "Bellevue",
+        "proposed_slots": "9 h"
+      },
+      "must_mention": [
+        "hall"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "26_rdv_visio.eml",
+      "message_id": "<26.rdv_visio@eval.atelier-lumiere.fr>",
+      "category": "rendez_vous",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Sarah Cohen",
+        "proposed_slots": "lundi"
+      },
+      "must_mention": [
+        "Cohen"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "27_rdv_report.eml",
+      "message_id": "<27.rdv_report@eval.atelier-lumiere.fr>",
+      "category": "rendez_vous",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Julien Roche",
+        "proposed_slots": "9 octobre"
+      },
+      "must_mention": [
+        "Roche"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "28_rdv_anglais.eml",
+      "message_id": "<28.rdv_anglais@eval.atelier-lumiere.fr>",
+      "category": "rendez_vous",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Anna Svensson",
+        "proposed_slots": "14"
+      },
+      "must_mention": [
+        "Svensson"
+      ],
+      "draft_expected": true,
+      "lang": "en",
+      "attachments": []
+    },
+    {
+      "file": "29_info_horaires.eml",
+      "message_id": "<29.info_horaires@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {
+        "question": "horaires"
+      },
+      "must_mention": [],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "30_info_livraison.eml",
+      "message_id": "<30.info_livraison@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {
+        "question": "Grenoble"
+      },
+      "must_mention": [
+        "Grenoble"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "31_info_ampoules.eml",
+      "message_id": "<31.info_ampoules@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {
+        "question": "NORD-40"
+      },
+      "must_mention": [
+        "NORD-40"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "32_info_catalogue.eml",
+      "message_id": "<32.info_catalogue@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {
+        "question": "catalogue"
+      },
+      "must_mention": [
+        "catalogue"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "33_info_candidature.eml",
+      "message_id": "<33.info_candidature@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Inès Robin"
+      },
+      "must_mention": [
+        "Robin"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "34_info_garantie.eml",
+      "message_id": "<34.info_garantie@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {
+        "question": "garantie"
+      },
+      "must_mention": [
+        "garantie"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "35_prosp_seo.eml",
+      "message_id": "<35.prosp_seo@eval.atelier-lumiere.fr>",
+      "category": "prospection",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "36_prosp_imite_client.eml",
+      "message_id": "<36.prosp_imite_client@eval.atelier-lumiere.fr>",
+      "category": "prospection",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "37_prosp_leads.eml",
+      "message_id": "<37.prosp_leads@eval.atelier-lumiere.fr>",
+      "category": "prospection",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "38_prosp_formation.eml",
+      "message_id": "<38.prosp_formation@eval.atelier-lumiere.fr>",
+      "category": "prospection",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "39_prosp_fabricant.eml",
+      "message_id": "<39.prosp_fabricant@eval.atelier-lumiere.fr>",
+      "category": "prospection",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "en",
+      "attachments": []
+    },
+    {
+      "file": "40_prosp_salon.eml",
+      "message_id": "<40.prosp_salon@eval.atelier-lumiere.fr>",
+      "category": "prospection",
+      "urgency": "basse",
+      "fraud": false,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "41_fraude_rib_sosie.eml",
+      "message_id": "<41.fraude_rib_sosie@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "haute",
+      "fraud": true,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "42_fraude_rib_parfait.eml",
+      "message_id": "<42.fraude_rib_parfait@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "haute",
+      "fraud": true,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "43_fraude_president.eml",
+      "message_id": "<43.fraude_president@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "haute",
+      "fraud": true,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "44_fraude_hameconnage.eml",
+      "message_id": "<44.fraude_hameconnage@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "haute",
+      "fraud": true,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "45_fraude_annuaire.eml",
+      "message_id": "<45.fraude_annuaire@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "normale",
+      "fraud": true,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "46_fraude_sosie_client.eml",
+      "message_id": "<46.fraude_sosie_client@eval.atelier-lumiere.fr>",
+      "category": "information",
+      "urgency": "haute",
+      "fraud": true,
+      "fields": {},
+      "must_mention": [],
+      "draft_expected": false,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "47_devis_artisan_gmail.eml",
+      "message_id": "<47.devis_artisan_gmail@eval.atelier-lumiere.fr>",
+      "category": "demande_devis",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "contact.name": "Patrick Lemoine",
+        "quantity": "10",
+        "product_or_service": "spot"
+      },
+      "must_mention": [
+        "Lemoine",
+        "spot"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": []
+    },
+    {
+      "file": "48_fact_dupont_iban.eml",
+      "message_id": "<48.fact_dupont_iban@eval.atelier-lumiere.fr>",
+      "category": "facture",
+      "urgency": "normale",
+      "fraud": false,
+      "fields": {
+        "supplier": "Dupont",
+        "invoice_number": "4831"
+      },
+      "must_mention": [
+        "4831"
+      ],
+      "draft_expected": true,
+      "lang": "fr",
+      "attachments": [
+        {
+          "file": "facture_4831.pdf",
+          "expected_status": "ok"
+        }
+      ]
+    }
+  ]
+}
