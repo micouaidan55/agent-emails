@@ -1,6 +1,7 @@
 """Éléments d'interface Streamlit partagés par les pages de app/."""
 
 import os
+import re
 from pathlib import Path
 
 import anthropic
@@ -39,9 +40,17 @@ PENDING = {EmailStatus.TO_CHECK, EmailStatus.ERROR, EmailStatus.DRAFT_READY, Ema
 _MD_SPECIAL = set("\\`*_{}[]()#+-.!|<>:~$&")
 
 
+_AUTOLINK = re.compile(r"(@|://|www(?=\\\.))", re.IGNORECASE)
+
+
 def md_escape(text: str | None) -> str:
-    """Neutralise le Markdown d'un texte non fiable (emails, sorties du modèle)."""
-    return "".join(f"\\{c}" if c in _MD_SPECIAL else c for c in (text or ""))
+    """Neutralise le Markdown d'un texte non fiable (emails, sorties du modèle).
+
+    Échappe la syntaxe Markdown, puis insère un caractère invisible (U+2060) dans « @ », « :// » et
+    « www. » : sans lui, Streamlit transforme d'office adresses et URL en liens cliquables.
+    """
+    escaped = "".join(f"\\{c}" if c in _MD_SPECIAL else c for c in (text or ""))
+    return _AUTOLINK.sub(lambda m: m.group(1)[0] + "\u2060" + m.group(1)[1:], escaped)
 
 
 def company() -> str:

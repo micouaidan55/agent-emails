@@ -111,6 +111,13 @@ def test_md_escape_neutralises_links():
     assert "[x](" not in escaped and escaped.startswith("\\[x\\]\\(")
 
 
+@pytest.mark.parametrize("text", ["compta@bureau-plus.fr", "https://evil.xyz/login", "www.evil.xyz"])
+def test_md_escape_prevents_autolinks(text):
+    escaped = web.md_escape(text)
+    assert "\u2060" in escaped
+    assert escaped.replace("\u2060", "").replace("\\", "") == text
+
+
 def test_fetch_without_api_key_does_not_process(env, monkeypatch):
     def boom(*args, **kwargs):
         raise AssertionError("process_inbox ne doit pas être appelé")

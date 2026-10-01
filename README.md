@@ -4,6 +4,10 @@
 
 Une PME reçoit chaque jour des demandes de devis, des réclamations, des factures, des demandes de rendez-vous et de la prospection. Trier, relire et répondre prend des heures. Cet agent fait le premier passage : chaque email arrive classé, résumé, avec une réponse prête à relire. Rien n'est envoyé sans validation humaine.
 
+![Démo : boîte de réception triée, fraudes bloquées, facture vérifiée, brouillons prêts](docs/demo.gif)
+
+*En 30 secondes : la boîte de réception arrive triée, avec les fraudes possibles en tête. Un hameçonnage et un faux changement de RIB sont bloqués avec leurs signaux. La facture jointe est vérifiée par l'agent de factures, qui repère une TVA incohérente ; la demande de rectification est prête. Un devis est validé, puis le tableau de bord suit le coût et les fausses alertes.*
+
 ## Ce que fait l'agent
 
 1. **Trie** chaque email : demande de devis, réclamation, facture, rendez-vous, information ou prospection, avec un niveau d'urgence et une explication.
