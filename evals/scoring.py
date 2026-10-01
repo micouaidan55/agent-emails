@@ -8,10 +8,16 @@ from statistics import mean
 
 from agent_emails.models import EmailResult
 
-MONTHS = "janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre"
-AMOUNT_RE = re.compile(r"\d[\d\s  .,]*\s?(?:€|euros?\b|EUR\b)", re.IGNORECASE)
+MONTH_NAMES = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre",
+               "novembre", "décembre"]
+MONTH_NUMBERS = {name: i for i, name in enumerate(MONTH_NAMES, 1)}
+MONTH_NUMBERS |= {"fevrier": 2, "aout": 8, "decembre": 12}
+MONTHS = "|".join(MONTH_NUMBERS)
+AMOUNT_RE = re.compile(r"\d[\d\s\u00a0\u202f.,]*\s?(?:€|\$|euros?\b|EUR\b)", re.IGNORECASE)
+BARE_NUMBER_RE = re.compile(r"\d{1,3}(?:[\s\u00a0\u202f]\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?")
 DATE_RE = re.compile(
-    rf"\b\d{{1,2}}(?:er)?\s+(?:{MONTHS})\b|\b\d{{1,2}}/\d{{1,2}}(?:/\d{{2,4}})?\b|\b\d{{4}}-\d{{2}}-\d{{2}}\b",
+    rf"(?<!\d)\d{{1,2}}(?:er)?\s+(?:{MONTHS})\b|(?<![\d/])\d{{1,2}}/\d{{1,2}}(?:/\d{{2,4}})?(?![\d/])"
+    rf"|(?<!\d)\d{{4}}-\d{{2}}-\d{{2}}(?!\d)",
     re.IGNORECASE,
 )
 
@@ -41,8 +47,15 @@ def field_ok(expected: str, actual: str | None) -> bool:
 
 
 def _amount_key(text: str) -> str:
-    digits = re.sub(r"[^\d,.]", "", text).replace(",", ".").rstrip(".")
-    return digits.split(".")[0] if digits.endswith((".0", ".00")) or digits.count(".") == 0 else digits
+    """Clé canonique d'un montant : séparateurs de milliers retirés, virgule décimale, ",00" supprimé."""
+    number = re.sub(r"[^\d,.]", "", text).strip(".,")
+    if "," in number:
+        number = number.replace(".", "").replace(",", ".")
+    elif re.fullmatch(r"\d{1,3}(?:\.\d{3})+", number):
+        number = number.replace(".", "")
+    if re.fullmatch(r"\d+\.0+", number):
+        number = number.split(".")[0]
+    return number
 
 
 def _date_keys(text: str) -> set[str]:
@@ -50,7 +63,10 @@ def _date_keys(text: str) -> set[str]:
     iso = re.fullmatch(r"(\d{4})-(\d{2})-(\d{2})", text)
     if iso:
         year, month, day = iso.groups()
-        return {text, f"{int(day)}/{int(month)}/{year}", f"{int(day)}/{int(month)}"}
+        return {f"{int(day)}/{int(month)}", f"{int(day)}/{int(month)}/{year}"}
+    named = re.fullmatch(rf"(\d{{1,2}})\s+({MONTHS})", text)
+    if named:
+        return {f"{int(named.group(1))}/{MONTH_NUMBERS[named.group(2)]}"}
     slash = re.fullmatch(r"(\d{1,2})/(\d{1,2})(?:/(\d{2,4}))?", text)
     if slash:
         day, month, year = slash.groups()
@@ -64,8 +80,12 @@ def _date_keys(text: str) -> set[str]:
 def inventions(draft: str, source: str) -> list[str]:
     """Montants et dates du brouillon absents de la source (email et analyse)."""
     source_amounts = {_amount_key(m) for m in AMOUNT_RE.findall(source)}
-    source_amounts |= {_amount_key(m) for m in re.findall(r"\d+(?:[.,]\d+)?", source)}
-    source_dates = set().union(*[_date_keys(m) for m in DATE_RE.findall(source)]) if DATE_RE.search(source) else set()
+    for number in BARE_NUMBER_RE.findall(source):
+        if len(re.sub(r"\D", "", number)) >= 3 or re.search(r"[.,]\d", number):
+            source_amounts.add(_amount_key(number))
+    source_dates = set()
+    for match in DATE_RE.findall(source):
+        source_dates |= _date_keys(match)
     invented = [m.strip() for m in AMOUNT_RE.findall(draft) if _amount_key(m) not in source_amounts]
     invented += [m.strip() for m in DATE_RE.findall(draft) if not (_date_keys(m) & source_dates)]
     return invented

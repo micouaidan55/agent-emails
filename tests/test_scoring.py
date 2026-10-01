@@ -94,3 +94,12 @@ def test_fraud_recall_is_none_without_fraud_cases():
 def test_markdown_contains_headline_numbers():
     text = to_markdown("claude-haiku-4-5 + claude-sonnet-5", summarize([outcome()]))
     assert "claude-haiku-4-5" in text and "100,0 %" in text and "Matrice de confusion" in text
+
+
+def test_inventions_french_number_and_date_formats():
+    assert inventions("Total : 1.200,50 €.", "Montant 1 200,50 € TTC.") == []
+    assert inventions("Total : 1200.50 €.", "Montant 1.200,50 € TTC.") == []
+    assert inventions("Rendez-vous le 15 octobre.", "Disponible le 15/10.") == []
+    assert inventions("Rendez-vous le 15/10/2026.", "Disponible le 15 octobre.") == []
+    assert inventions("Un acompte de 15 €.", "Disponible le 15/10.") == ["15 €"]
+    assert inventions("Rendez-vous le 5/10.", "Disponible le 15/10.") == ["5/10"]

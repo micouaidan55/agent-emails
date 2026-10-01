@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from agent_emails.models import EmailStatus, render_email
 from agent_emails.parsing import parse_eml
 from agent_emails.pipeline.fraud import KnownSenders
-from agent_emails.pipeline.llm import DRAFT_MODEL, EXTRACTION_MODEL, JUDGE_MODEL, TRIAGE_MODEL
+from agent_emails.pipeline.llm import DRAFT_MODEL, EXTRACTION_MODEL, JUDGE_MODEL, TRIAGE_MODEL, StepError
 from agent_emails.pipeline.runner import Pipeline, PipelineConfig
 from evals.judge import judge_draft
 from evals.scoring import EmailOutcome, source_text, summarize, to_markdown
@@ -57,49 +57,64 @@ def main() -> None:
 
     known = KnownSenders(domains=frozenset(expected.get("known_domains", [])))
     outcomes, details, total_cost = [], [], 0.0
-    for item in expected["emails"]:
-        email = parse_eml((args.dataset / item["file"]).read_bytes())
-        started = time.perf_counter()
-        result = pipeline.process(email, known=known)
-        elapsed = time.perf_counter() - started
-        total_cost += result.usage.cost_usd
-        judge = None
-        if result.draft and not args.no_judge:
-            analysis = json.dumps({"categorie": result.triage.category.value if result.triage else None,
-                                   "informations": result.extraction}, ensure_ascii=False)
-            score, usage = judge_draft(client, render_email(email), analysis, result.draft, JUDGE_MODEL)
-            judge = score.model_dump()
-            total_cost += usage.cost_usd
-        outcome = EmailOutcome(
-            file=item["file"], expected=item,
-            category=result.triage.category.value if result.triage else None,
-            urgency=result.triage.urgency.value if result.triage else None,
-            extraction=result.extraction, draft=result.draft,
-            invoice_statuses=[c.status for c in result.invoice_checks], judge=judge,
-            cost_usd=result.usage.cost_usd, seconds=elapsed, error=result.error, source=source_text(result),
-            suspected=result.status is EmailStatus.SUSPECT,
-        )
-        outcomes.append(outcome)
-        details.append({"file": item["file"], "attendu": item["category"], "obtenu": outcome.category,
-                        "fraude_attendue": item.get("fraud", False), "suspect": outcome.suspected,
-                        "signaux": [s.code for s in result.fraud_signals],
-                        "urgence": outcome.urgency, "statut": result.status.value, "brouillon": result.draft,
-                        "extraction": result.extraction, "juge": judge, "erreur": result.error,
-                        "cout_usd": result.usage.cost_usd, "secondes": elapsed})
-        print(f"{item['file']:<32} {outcome.category or '—':<14} {outcome.urgency or '—':<8} {elapsed:.1f}s"
-              f" — cumul {total_cost:.4f} $", flush=True)
-        if args.max_cost is not None and total_cost >= args.max_cost:
-            print(f"Budget de {args.max_cost:.2f} $ atteint : arrêt après {len(outcomes)} emails.")
-            break
-
-    label = f"{args.triage_model} + {args.draft_model}"
-    report = to_markdown(label, summarize(outcomes))
-    args.out.mkdir(parents=True, exist_ok=True)
-    stem = f"{args.triage_model}__{args.draft_model}"
-    (args.out / f"{stem}.md").write_text(report)
-    (args.out / f"{stem}.json").write_text(json.dumps(details, ensure_ascii=False, indent=2))
-    print("\n" + report)
-    print(f"Coût total de l'évaluation (juge compris) : {total_cost:.4f} $")
+    complete = False
+    try:
+        for item in expected["emails"]:
+            email = parse_eml((args.dataset / item["file"]).read_bytes())
+            started = time.perf_counter()
+            result = pipeline.process(email, known=known)
+            elapsed = time.perf_counter() - started
+            total_cost += result.usage.cost_usd
+            judge, judge_error = None, None
+            if result.draft and not args.no_judge:
+                analysis = json.dumps({"categorie": result.triage.category.value if result.triage else None,
+                                       "informations": result.extraction}, ensure_ascii=False)
+                try:
+                    score, usage = judge_draft(client, render_email(email), analysis, result.draft, JUDGE_MODEL)
+                    judge = score.model_dump()
+                    total_cost += usage.cost_usd
+                except StepError as exc:
+                    total_cost += exc.usage.cost_usd
+                    judge_error = f"Juge en échec : {exc}"
+                except anthropic.APIError as exc:
+                    judge_error = f"Juge en échec ({type(exc).__name__}) : {exc}"
+            outcome = EmailOutcome(
+                file=item["file"], expected=item,
+                category=result.triage.category.value if result.triage else None,
+                urgency=result.triage.urgency.value if result.triage else None,
+                extraction=result.extraction, draft=result.draft,
+                invoice_statuses=[c.status for c in result.invoice_checks], judge=judge,
+                cost_usd=result.usage.cost_usd, seconds=elapsed, error=result.error, source=source_text(result),
+                suspected=result.status is EmailStatus.SUSPECT,
+            )
+            outcomes.append(outcome)
+            details.append({"file": item["file"], "attendu": item["category"], "obtenu": outcome.category,
+                            "fraude_attendue": item.get("fraud", False), "suspect": outcome.suspected,
+                            "signaux": [s.code for s in result.fraud_signals],
+                            "urgence": outcome.urgency, "statut": result.status.value, "brouillon": result.draft,
+                            "extraction": result.extraction, "juge": judge, "erreur": result.error,
+                            "erreur_juge": judge_error,
+                            "cout_usd": result.usage.cost_usd, "secondes": elapsed})
+            print(f"{item['file']:<32} {outcome.category or '—':<14} {outcome.urgency or '—':<8} {elapsed:.1f}s"
+                  f" — cumul {total_cost:.4f} $", flush=True)
+            if args.max_cost is not None and total_cost >= args.max_cost:
+                print(f"Budget de {args.max_cost:.2f} $ atteint : arrêt après {len(outcomes)} emails.")
+                break
+        else:
+            complete = True
+    finally:
+        total = len(expected["emails"])
+        label = f"{args.triage_model} + {args.draft_model}"
+        stem = f"{args.triage_model}__{args.draft_model}"
+        if not complete:
+            label += f" (partiel : {len(outcomes)}/{total} emails)"
+            stem += "__partiel"
+        report = to_markdown(label, summarize(outcomes))
+        args.out.mkdir(parents=True, exist_ok=True)
+        (args.out / f"{stem}.md").write_text(report)
+        (args.out / f"{stem}.json").write_text(json.dumps(details, ensure_ascii=False, indent=2))
+        print("\n" + report)
+        print(f"Coût total de l'évaluation (juge compris) : {total_cost:.4f} $")
 
 
 if __name__ == "__main__":
