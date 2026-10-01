@@ -87,7 +87,11 @@ def process_inbox(
         store.record_fetch_error(filename, message)
     results = []
     for email in fetched.emails:
-        result = pipeline.process(email)
+        try:
+            result = pipeline.process(email)
+        except Exception as exc:
+            result = Pipeline._result(email, EmailStatus.ERROR, time.perf_counter(), Usage(),
+                                      error=f"Erreur inattendue : {exc}")
         store.save_result(result)
         store.log(email.message_id, "analyse", {
             "statut": result.status.value,

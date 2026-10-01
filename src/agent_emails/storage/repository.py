@@ -125,7 +125,11 @@ class EmailStore:
         self._conn.commit()
 
     def known_ids(self) -> set[str]:
-        return {row["message_id"] for row in self._conn.execute("SELECT message_id FROM emails")}
+        # Un email en erreur reste relevable ; les fichiers illisibles ("fichier:…") restent connus.
+        rows = self._conn.execute(
+            "SELECT message_id FROM emails WHERE status != 'erreur' OR message_id LIKE 'fichier:%'"
+        )
+        return {row["message_id"] for row in rows}
 
     def get(self, message_id: str) -> StoredEmail | None:
         rows = self._select("WHERE message_id = ?", (message_id,))

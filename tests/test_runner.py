@@ -118,3 +118,39 @@ def test_regenerate_draft_rebuilds_inputs_from_storage(tmp_path):
     draft, usage = regenerate_draft(client, store.get("<devis-1@exemple.fr>"), "Atelier Lumière SAS")
     assert draft == "Nouveau brouillon"
     assert "12" in client.messages.calls[0]["messages"][0]["content"]
+
+
+def _inbox(tmp_path, count):
+    inbox = tmp_path / "inbox"
+    inbox.mkdir()
+    for number in range(1, count + 1):
+        (inbox / f"0{number}.eml").write_bytes(build_eml(message_id=f"<{number}@x>"))
+    return FolderSource(inbox, tmp_path / "drafts")
+
+
+def test_email_in_api_error_is_processed_again_on_next_run(tmp_path):
+    error = anthropic.APIConnectionError(request=httpx.Request("POST", "https://api.anthropic.com/v1/messages"))
+    store = EmailStore(connect())
+    source = _inbox(tmp_path, 1)
+    process_inbox(source, store, pipeline(FakeClient([error]), tmp_path))
+    assert store.get("<1@x>").status is EmailStatus.ERROR
+    results = process_inbox(source, store, pipeline(client_for(), tmp_path))
+    assert [r.status for r in results] == [EmailStatus.DRAFT_READY]
+    assert store.get("<1@x>").status is EmailStatus.DRAFT_READY
+
+
+def test_unexpected_exception_does_not_stop_the_inbox(tmp_path):
+    store = EmailStore(connect())
+    good = client_for()
+    calls = []
+
+    def respond(kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            return RuntimeError("boum")
+        return good.messages._responses(kwargs)
+
+    results = process_inbox(_inbox(tmp_path, 2), store, pipeline(FakeClient(respond), tmp_path))
+    assert [r.status for r in results] == [EmailStatus.ERROR, EmailStatus.DRAFT_READY]
+    assert "boum" in results[0].error
+    assert store.get("<1@x>").status is EmailStatus.ERROR

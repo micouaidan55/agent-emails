@@ -262,3 +262,12 @@ def test_received_at_stored_in_utc(store):
     stored2 = store.get("<tz2>")
     assert stored1.received_at == email1_time
     assert stored2.received_at == email2_time
+
+
+def test_known_ids_excludes_emails_in_error_so_they_are_retried(store):
+    ok, failed = result(), result()
+    ok.email.message_id, failed.email.message_id = "<ok@x.fr>", "<ko@x.fr>"
+    failed.status = EmailStatus.ERROR
+    store.save_result(ok)
+    store.save_result(failed)
+    assert store.known_ids() == {"<ok@x.fr>"}
