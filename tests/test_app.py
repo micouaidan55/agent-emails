@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from streamlit.testing.v1 import AppTest
 
+from agent_emails import web
 from agent_emails.models import Category, EmailResult, EmailStatus, Triage
 from agent_emails.storage.db import connect
 from agent_emails.storage.repository import EmailStore
@@ -89,3 +90,52 @@ def test_dashboard_shows_product_metrics(env):
     for label in ("Emails traités", "Urgences en attente", "Brouillons validés sans modification",
                   "Catégories corrigées", "Coût moyen par email", "Temps gagné estimé"):
         assert label in labels
+
+
+def test_untrusted_subject_is_not_rendered_as_markdown(env):
+    _, store = env
+    store.save_result(EmailResult(
+        email=make_email(message_id="<evil@x>", subject="[x](http://evil)"), status=EmailStatus.TO_CHECK,
+        triage=Triage(category="information", urgency="basse", confidence=0.4, explanation="e", summary="[y](http://evil)"),
+    ))
+    at = run_app()
+    texts = [m.value for m in at.markdown if "evil" in m.value]
+    assert texts
+    assert not any("[x](http://evil)" in t for t in texts)
+    assert any("\\[x\\]\\(http" in t for t in texts)
+
+
+def test_md_escape_neutralises_links():
+    escaped = web.md_escape("[x](http://evil)")
+    assert "[x](" not in escaped and escaped.startswith("\\[x\\]\\(")
+
+
+def test_fetch_without_api_key_does_not_process(env, monkeypatch):
+    def boom(*args, **kwargs):
+        raise AssertionError("process_inbox ne doit pas être appelé")
+    monkeypatch.setattr(web, "process_inbox", boom)
+    at = run_app()
+    next(b for b in at.button if b.label == "Relever les emails").click().run()
+    assert not at.exception
+    assert any("Clé d'API" in e.value for e in at.error)
+
+
+def test_ignoring_an_email_sets_its_status(env):
+    _, store = env
+    at = AppTest.from_file(APP_PATH, default_timeout=30)
+    at.session_state["selected"] = ID
+    at.run()
+    next(b for b in at.button if b.key == f"ignorer-{ID}").click().run()
+    assert not at.exception
+    assert store.get(ID).status is EmailStatus.IGNORED
+
+
+def test_correcting_the_urgency_is_recorded(env):
+    _, store = env
+    at = AppTest.from_file(APP_PATH, default_timeout=30)
+    at.session_state["selected"] = ID
+    at.run()
+    at.selectbox(key=f"urg-{ID}").set_value("basse").run()
+    assert not at.exception
+    assert store.get(ID).urgency.value == "basse"
+    assert store._conn.execute("SELECT COUNT(*) FROM corrections WHERE field = 'urgency'").fetchone()[0] == 1

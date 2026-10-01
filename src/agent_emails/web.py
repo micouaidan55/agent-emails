@@ -34,6 +34,14 @@ INVOICE_ICONS = {"ok": "✅", "anomalie": "⚠️", "a_revoir": "❓"}
 PENDING = {EmailStatus.TO_CHECK, EmailStatus.ERROR, EmailStatus.DRAFT_READY, EmailStatus.TO_IGNORE}
 
 
+_MD_SPECIAL = set("\\`*_{}[]()#+-.!|<>:~$&")
+
+
+def md_escape(text: str | None) -> str:
+    """Neutralise le Markdown d'un texte non fiable (emails, sorties du modèle)."""
+    return "".join(f"\\{c}" if c in _MD_SPECIAL else c for c in (text or ""))
+
+
 def company() -> str:
     return os.environ.get("COMPANY_NAME", DEFAULT_COMPANY)
 
@@ -83,30 +91,44 @@ def _close(message_id: str, emails: EmailStore, status: EmailStatus, action: str
 
 
 def _render_invoice_check(stored: StoredEmail, check: InvoiceCheck, emails: EmailStore) -> None:
-    with st.expander(f"{INVOICE_ICONS.get(check.status, '❓')} Facture jointe : {check.filename}", expanded=True):
-        st.write(check.explanation)
+    with st.expander(f"{INVOICE_ICONS.get(check.status, '❓')} Facture jointe : {md_escape(check.filename)}",
+                     expanded=True):
+        st.write(md_escape(check.explanation))
         for issue in check.issues:
-            st.warning(f"**{issue.code}** : {issue.message}")
-        if check.invoice and st.button("Enregistrer la facture dans agent-factures",
-                                       key=f"facture-{stored.message_id}-{check.filename}"):
-            invoice_id = invoice_repository().add(Invoice.model_validate(check.invoice), source_file=check.path)
-            emails.log(stored.message_id, "facture_enregistree", {"id": invoice_id, "fichier": check.filename})
+            st.warning(f"**{md_escape(issue.code)}** : {md_escape(issue.message)}")
+        if not check.invoice:
+            return
+        already = any(
+            e["message_id"] == stored.message_id and e["action"] == "facture_enregistree"
+            and e["detail"].get("fichier") == check.filename
+            for e in emails.list_log(limit=100000)
+        )
+        if already:
             st.success("Facture enregistrée dans agent-factures.")
+        elif st.button("Enregistrer la facture dans agent-factures",
+                       key=f"facture-{stored.message_id}-{check.filename}"):
+            try:
+                invoice_id = invoice_repository().add(Invoice.model_validate(check.invoice), source_file=check.path)
+            except Exception as exc:
+                st.error(f"Enregistrement de la facture impossible : {md_escape(str(exc))}")
+                return
+            emails.log(stored.message_id, "facture_enregistree", {"id": invoice_id, "fichier": check.filename})
+            st.rerun()
 
 
 def render_email_card(stored: StoredEmail, emails: EmailStore) -> None:
     key = stored.message_id
     with st.container(border=True):
-        st.subheader(stored.subject)
+        st.subheader(md_escape(stored.subject))
         left, right = st.columns(2)
         with left:
-            st.caption(f"De : {stored.sender_name} <{stored.sender_address}> · {stored.received_at:%d/%m/%Y %H:%M}")
+            st.caption(f"De : {md_escape(stored.sender_name)} \\<{md_escape(stored.sender_address)}\\> · {stored.received_at:%d/%m/%Y %H:%M}")
             st.text(stored.body)
             if stored.attachments:
-                st.caption("Pièces jointes : " + ", ".join(stored.attachments))
+                st.caption("Pièces jointes : " + ", ".join(md_escape(a) for a in stored.attachments))
         with right:
             if stored.error:
-                st.warning(stored.error)
+                st.warning(md_escape(stored.error))
             if stored.category:
                 category = st.selectbox("Catégorie", list(Category), index=list(Category).index(stored.category),
                                         format_func=CATEGORY_LABELS.get, key=f"cat-{key}")
@@ -120,7 +142,7 @@ def render_email_card(stored: StoredEmail, emails: EmailStore) -> None:
                     emails.correct(key, "urgency", urgency.value)
                     st.rerun()
             if stored.explanation:
-                st.caption(f"{stored.explanation} (confiance {stored.confidence or 0:.0%})")
+                st.caption(f"{md_escape(stored.explanation)} (confiance {stored.confidence or 0:.0%})")
             if stored.extraction:
                 flat = pd.json_normalize(stored.extraction, sep=" · ").T.rename(columns={0: "Valeur"})
                 st.dataframe(flat.astype(str), width="stretch")
@@ -132,10 +154,14 @@ def render_email_card(stored: StoredEmail, emails: EmailStore) -> None:
                                      height=260, key=f"draft-{key}")
             actions = st.container(horizontal=True)
             if draft is not None and actions.button("Valider le brouillon", type="primary", key=f"valider-{key}"):
-                emails.update_draft(key, draft)
-                location = source().save_draft(stored.to_email(), draft)
-                _close(key, emails, EmailStatus.VALIDATED, "brouillon_valide",
-                       {"modifie": draft != stored.draft_original, "fichier": location})
+                try:
+                    location = source().save_draft(stored.to_email(), draft)
+                except OSError as exc:
+                    st.error(f"Le brouillon n'a pas pu être déposé, rien n'a été modifié : {md_escape(exc.strerror or str(exc))}")
+                else:
+                    emails.update_draft(key, draft)
+                    _close(key, emails, EmailStatus.VALIDATED, "brouillon_valide",
+                           {"modifie": draft != stored.draft_original, "fichier": location})
             if actions.button("Ignorer", key=f"ignorer-{key}"):
                 _close(key, emails, EmailStatus.IGNORED, "ignore")
             if stored.category and stored.category is not Category.PROSPECTING and actions.button(
@@ -143,11 +169,15 @@ def render_email_card(stored: StoredEmail, emails: EmailStore) -> None:
             ):
                 client = _client()
                 if client:
-                    text, usage = regenerate_draft(client, stored, company())
-                    emails.update_draft(key, text or "", original=True)
-                    emails.log(key, "brouillon_regenere", {"cout_usd": round(usage.cost_usd, 5)})
-                    st.session_state.pop(f"draft-{key}", None)
-                    st.rerun()
+                    try:
+                        text, usage = regenerate_draft(client, stored, company())
+                    except Exception:
+                        st.error("La régénération du brouillon a échoué. Réessaie dans un instant.")
+                    else:
+                        emails.update_draft(key, text or "", original=True)
+                        emails.log(key, "brouillon_regenere", {"cout_usd": round(usage.cost_usd, 5)})
+                        st.session_state.pop(f"draft-{key}", None)
+                        st.rerun()
             st.caption(f"Coût de l'analyse : {stored.cost_usd:.4f} $ · {stored.seconds:.1f} s")
 
 
@@ -157,9 +187,15 @@ def render_inbox_page() -> None:
         client = _client()
         if client:
             with st.status("Relevé et analyse des emails…", expanded=True) as box:
-                results = process_inbox(source(), emails, _pipeline(client),
-                                        on_result=lambda r: box.write(f"{r.email.subject} → {STATUS_LABELS[r.status]}"))
-                box.update(label=f"{len(results)} email(s) traité(s)", state="complete", expanded=False)
+                try:
+                    results = process_inbox(
+                        source(), emails, _pipeline(client),
+                        on_result=lambda r: box.write(f"{md_escape(r.email.subject)} → {STATUS_LABELS[r.status]}"))
+                except Exception:
+                    box.update(label="Le relevé a échoué", state="error")
+                    st.error("Le relevé des emails a échoué (service d'analyse ou dossier inaccessible). Réessaie dans un instant.")
+                else:
+                    box.update(label=f"{len(results)} email(s) traité(s)", state="complete", expanded=False)
     selected = st.session_state.get("selected")
     stored = emails.get(selected) if selected else None
     if stored:
@@ -177,7 +213,8 @@ def render_inbox_page() -> None:
                 CATEGORY_LABELS.get(email.category) if email.category else None,
                 URGENCY_LABELS.get(email.urgency) if email.urgency else None,
             ]))
-            st.markdown(f"**{email.subject}**  \n{email.sender_name or email.sender_address} — {email.summary or email.error or ''}  \n:small[{badges}]")
+            st.markdown(f"**{md_escape(email.subject)}**  \n{md_escape(email.sender_name or email.sender_address)} — "
+                        f"{md_escape(email.summary or email.error or '')}  \n:small[{badges}]")
             if st.button("Ouvrir", key=f"open-{index}"):
                 st.session_state["selected"] = email.message_id
                 st.rerun()
@@ -209,11 +246,11 @@ def _render_decided(status: EmailStatus, empty: str) -> None:
     if not emails:
         st.info(empty)
     for email in emails:
-        with st.expander(f"{email.subject} — {email.sender_name or email.sender_address}"):
+        with st.expander(f"{md_escape(email.subject)} — {md_escape(email.sender_name or email.sender_address)}"):
             if email.draft:
                 st.code(email.draft, language=None, wrap_lines=True)
             else:
-                st.caption(email.summary or "")
+                st.caption(md_escape(email.summary))
 
 
 def render_validated_page() -> None:
