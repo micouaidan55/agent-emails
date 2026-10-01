@@ -36,3 +36,14 @@ def test_generate_writes_readable_emails(tmp_path):
         assert names == [a["file"] for a in item["attachments"]]
         for part in message.iter_attachments():
             assert part.get_payload(decode=True).startswith(b"%PDF")
+
+
+def test_generation_is_reproducible(tmp_path):
+    dir1 = tmp_path / "run1"
+    dir2 = tmp_path / "run2"
+    generate(dir1)
+    generate(dir2)
+    for item in json.loads((dir1 / "expected.json").read_text())["emails"]:
+        file1 = (dir1 / item["file"]).read_bytes()
+        file2 = (dir2 / item["file"]).read_bytes()
+        assert file1 == file2, f"Files {item['file']} differ between runs"

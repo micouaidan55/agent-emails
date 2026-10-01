@@ -3,6 +3,7 @@
 Usage : uv run python -m evals.generate
 """
 
+import hashlib
 import io
 import json
 from datetime import date, datetime, timedelta, timezone
@@ -26,7 +27,7 @@ def invoice_pdf(supplier: str, number: str, issued: date, lines: list[tuple[str,
     vat = (ht * Decimal("0.20")).quantize(Decimal("0.01"))
     printed_vat = vat + Decimal(vat_error) if vat_error else vat
     buffer = io.BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=A4)
+    pdf = canvas.Canvas(buffer, pagesize=A4, invariant=1)
     rows = [supplier, "", f"FACTURE N° {number}", f"Date : {issued:%d/%m/%Y}",
             f"Échéance : {issued + timedelta(days=30):%d/%m/%Y}", "", f"Client : {COMPANY}", ""]
     rows += [f"{label} | {qty} | {Decimal(price):.2f} € | {Decimal(price) * qty:.2f} €" for label, qty, price in lines]
@@ -306,6 +307,8 @@ def build_eml(spec: dict) -> bytes:
         msg.set_content(spec["body"])
     for attachment in spec["attachments"]:
         msg.add_attachment(attachment["pdf"], maintype="application", subtype="pdf", filename=attachment["file"])
+    if msg.is_multipart():
+        msg.set_boundary("=====" + hashlib.sha1(spec["message_id"].encode()).hexdigest()[:24] + "=====")
     return msg.as_bytes()
 
 
