@@ -209,7 +209,7 @@ Navigation en haut de page : **Boîte de réception** · **Tableau de bord** · 
 | Pièce jointe exécutable ou à double extension (`facture.pdf.exe`) | forte |
 | Lien dont le texte affiche un domaine et qui pointe vers un autre | forte |
 | Adresse de réponse sur un autre domaine que l'expéditeur | faible |
-| Nom affiché qui contient une autre adresse email ou le nom d'une organisation absente du domaine | faible |
+| Nom affiché qui contient une autre adresse email | faible |
 | Messagerie gratuite (gmail, outlook…) pour un expéditeur qui se présente comme une entreprise | faible |
 | IBAN ou mention d'un changement de coordonnées bancaires | faible |
 
