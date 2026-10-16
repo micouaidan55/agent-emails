@@ -1,5 +1,7 @@
 # Agent emails
 
+> Projet 2 d'une suite d'agents pour PME : [agent-factures](https://github.com/micouaidan55/agent-factures) (projet 1) vérifie les factures, agent-emails trie la boîte de réception, [agent-relances](https://github.com/micouaidan55/agent-relances) (projet 3) relance les impayés.
+
 **Un pipeline IA qui trie la boîte de réception d'une PME, extrait l'essentiel de chaque email, transmet les factures à l'[agent de factures](https://github.com/micouaidan55/agent-factures) et prépare des brouillons de réponse, sous votre contrôle.**
 
 Une PME reçoit chaque jour des demandes de devis, des réclamations, des factures, des demandes de rendez-vous et de la prospection. Trier, relire et répondre prend des heures. Cet agent fait le premier passage : chaque email arrive classé, résumé, avec une réponse prête à relire. Rien n'est envoyé sans validation humaine.
