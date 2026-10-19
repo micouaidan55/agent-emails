@@ -44,19 +44,18 @@ class Pipeline:
     def process(self, email: Email, known: KnownSenders | None = None, check_fraud: bool = True) -> EmailResult:
         started = time.perf_counter()
         usage = Usage()
-        # Une réponse à une relance est laissée à agent-relances, avant tout appel au modèle.
-        # Sécurité : un fraudeur peut ajouter une fausse balise « [Réf. …] » pour échapper au contrôle de
-        # fraude d'agent-emails. C'est accepté : agent-relances applique son propre contrôle
-        # (reply_is_suspicious) à chaque réponse avant de proposer une action, et un humain confirme toujours.
-        if RELANCE_REFERENCE.search(email.subject):
-            return self._result(email, EmailStatus.TO_IGNORE, started, usage, note=RELANCE_NOTE)
         triage = None
         extraction = None
         checks = []
         if known is None:
             domain = self.config.company_domain.strip().lower()
             known = KnownSenders(domains=frozenset({domain} - {""}))
-        signals = fraud_signals(email, known)
+        signals = fraud_signals(email, known)  # code seul, aucun appel au modèle
+        # Une réponse à une relance est laissée à agent-relances, avant tout appel au modèle, sauf si les
+        # signaux du code la rendent déjà suspecte : une fausse balise « [Réf. …] » ne contourne pas le contrôle
+        # de fraude, l'email suit alors le circuit normal et est bloqué comme suspect.
+        if RELANCE_REFERENCE.search(email.subject) and not (check_fraud and is_suspicious(signals, None)):
+            return self._result(email, EmailStatus.TO_IGNORE, started, usage, note=RELANCE_NOTE)
 
         def blocked(risk) -> bool:
             return check_fraud and is_suspicious(signals, risk)

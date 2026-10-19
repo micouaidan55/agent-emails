@@ -101,7 +101,7 @@ Le même principe que dans l'agent de factures. Du code testé repère les signa
 
 ### Réponses aux relances
 
-Les réponses à une relance d'[agent-relances](https://github.com/micouaidan55/agent-relances) (objet portant `[Réf. R-00042]` ou `[Réf. E-00007]`) sont laissées à cet agent : statut « À ignorer », aucun appel au modèle, aucun coût. Une fausse balise ne contourne rien : agent-relances applique son propre contrôle de fraude à chaque réponse, et un humain confirme toute action.
+Les réponses à une relance d'[agent-relances](https://github.com/micouaidan55/agent-relances) (objet portant `[Réf. R-00042]` ou `[Réf. E-00007]`) sont laissées à cet agent : statut « À ignorer », aucun appel au modèle, aucun coût. Une fausse balise ne contourne pas le contrôle de fraude : les signaux du code (gratuits) sont vérifiés d'abord, et un email suspect (domaine sosie, IBAN, lien trompeur…) suit le circuit normal et est bloqué comme suspect. agent-relances refait en plus son propre contrôle sur chaque réponse, et un humain confirme toute action.
 
 ### Garde-fous
 

@@ -293,3 +293,21 @@ def test_reminder_reply_is_journaled(tmp_path):
     assert results[0].status is EmailStatus.TO_IGNORE
     entry = store.list_log()[0]
     assert entry["detail"]["note"] == "Réponse à une relance : traitée par agent-relances"
+
+
+def test_fake_reference_does_not_bypass_the_fraud_check(tmp_path):
+    client = fraud_client()
+    email = make_email(sender_address="c.martin@hotel-canut.fr", subject="Re: Rappel facture AL-1 [Réf. R-00042]")
+    result = pipeline(client, tmp_path).process(email, known=KNOWN)
+    assert result.status is EmailStatus.SUSPECT
+    assert result.note is None
+    assert [s.code for s in result.fraud_signals] == ["domaine_sosie"]
+
+
+def test_clean_reminder_reply_is_still_ignored_without_model_call(tmp_path):
+    client = FakeClient([])
+    email = make_email(sender_address="c.martin@hotel-canuts.fr", subject="Re: Rappel facture AL-1 [Réf. R-00042]")
+    result = pipeline(client, tmp_path).process(email, known=KNOWN)
+    assert result.status is EmailStatus.TO_IGNORE
+    assert result.note == "Réponse à une relance : traitée par agent-relances"
+    assert client.messages.calls == []
