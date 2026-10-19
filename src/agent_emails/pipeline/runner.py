@@ -1,5 +1,6 @@
 """Orchestration : le code décide de l'enchaînement des étapes, pas le modèle."""
 
+import re
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -18,6 +19,9 @@ from agent_emails.pipeline.triage import triage_email
 from agent_emails.storage.repository import EmailStore, StoredEmail
 
 CONFIDENCE_THRESHOLD = 0.7
+# Référence portée par les relances et échéanciers d'agent-relances : [Réf. R-00042] ou [Réf. E-00007].
+RELANCE_REFERENCE = re.compile(r"\[Réf\. [RE]-\d{5}\]")
+RELANCE_NOTE = "Réponse à une relance : traitée par agent-relances"
 
 
 @dataclass
@@ -40,6 +44,12 @@ class Pipeline:
     def process(self, email: Email, known: KnownSenders | None = None, check_fraud: bool = True) -> EmailResult:
         started = time.perf_counter()
         usage = Usage()
+        # Une réponse à une relance est laissée à agent-relances, avant tout appel au modèle.
+        # Sécurité : un fraudeur peut ajouter une fausse balise « [Réf. …] » pour échapper au contrôle de
+        # fraude d'agent-emails. C'est accepté : agent-relances applique son propre contrôle
+        # (reply_is_suspicious) à chaque réponse avant de proposer une action, et un humain confirme toujours.
+        if RELANCE_REFERENCE.search(email.subject):
+            return self._result(email, EmailStatus.TO_IGNORE, started, usage, note=RELANCE_NOTE)
         triage = None
         extraction = None
         checks = []
@@ -87,11 +97,11 @@ class Pipeline:
 
     @staticmethod
     def _result(email, status, started, usage, triage=None, extraction=None, checks=(), draft=None, error=None,
-                signals=()):
+                signals=(), note=None):
         return EmailResult(
             email=email, status=status, triage=triage, extraction=extraction, invoice_checks=list(checks),
             draft=draft, error=error, usage=usage, seconds=time.perf_counter() - started,
-            fraud_signals=list(signals),
+            fraud_signals=list(signals), note=note,
         )
 
 
@@ -102,6 +112,7 @@ def _save_and_log(store: EmailStore, result: EmailResult) -> None:
         "categorie": result.triage.category.value if result.triage else None,
         "signaux": [s.code for s in result.fraud_signals],
         "cout_usd": round(result.usage.cost_usd, 5),
+        **({"note": result.note} if result.note else {}),
     })
 
 

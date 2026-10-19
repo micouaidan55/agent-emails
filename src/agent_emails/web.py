@@ -15,7 +15,9 @@ from dotenv import load_dotenv
 
 from agent_emails.connectors.folder import FolderSource
 from agent_emails.models import Category, EmailStatus, InvoiceCheck, Urgency
-from agent_emails.pipeline.runner import Pipeline, PipelineConfig, process_inbox, regenerate_draft, reprocess_cleared
+from agent_emails.pipeline.runner import (
+    RELANCE_NOTE, Pipeline, PipelineConfig, process_inbox, regenerate_draft, reprocess_cleared,
+)
 from agent_emails.storage.db import connect
 from agent_emails.storage.repository import EmailStore, StoredEmail
 
@@ -182,6 +184,8 @@ def render_email_card(stored: StoredEmail, emails: EmailStore) -> None:
                 if urgency != stored.urgency:
                     emails.correct(key, "urgency", urgency.value)
                     st.rerun()
+            if stored.status is EmailStatus.TO_IGNORE and stored.category is None:
+                st.info(RELANCE_NOTE)
             if stored.explanation:
                 st.caption(f"{md_escape(stored.explanation)} (confiance {stored.confidence or 0:.0%})")
             if stored.extraction:

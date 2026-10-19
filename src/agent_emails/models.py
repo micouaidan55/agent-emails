@@ -172,6 +172,7 @@ class EmailResult(BaseModel):
     usage: Usage = Field(default_factory=Usage)
     seconds: float = 0.0
     fraud_signals: list[FraudSignal] = Field(default_factory=list)
+    note: str | None = None
 
 
 def render_email(email: Email) -> str:

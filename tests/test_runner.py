@@ -255,7 +255,41 @@ def test_process_inbox_uses_extra_domains_for_lookalikes(tmp_path):
     (inbox / "a.eml").write_bytes(build_eml(message_id="<l@x>", sender="C. Martin <c.martin@hotel-canut.fr>"))
     config = PipelineConfig(company="Atelier Lumière SAS", attachments_dir=tmp_path / "pj",
                             extra_domains=("hotel-canuts.fr",))
-    store = EmailStore(connect(tmp_path / "e.db"))
+    store = EmailStore(connect())
     results = process_inbox(FolderSource(inbox, tmp_path / "drafts"), store,
                             Pipeline(fraud_client(category="demande_devis"), None, config))
     assert results[0].status is EmailStatus.SUSPECT
+
+
+def test_reply_to_a_reminder_is_left_to_agent_relances(tmp_path):
+    client = FakeClient([])
+    email = make_email(subject="Re: Rappel facture AL-1 [Réf. R-00042]")
+    result = pipeline(client, tmp_path).process(email)
+    assert result.status is EmailStatus.TO_IGNORE
+    assert result.triage is None and result.draft is None and result.error is None
+    assert result.usage.cost_usd == 0
+    assert result.note == "Réponse à une relance : traitée par agent-relances"
+    assert client.messages.calls == []
+
+
+def test_reply_to_an_installment_plan_is_left_to_agent_relances(tmp_path):
+    client = FakeClient([])
+    result = pipeline(client, tmp_path).process(make_email(subject="Re: Échéancier [Réf. E-00007]"))
+    assert result.status is EmailStatus.TO_IGNORE and client.messages.calls == []
+
+
+def test_email_without_reference_follows_the_normal_pipeline(tmp_path):
+    client = client_for()
+    result = pipeline(client, tmp_path).process(make_email(subject="Demande de devis [Réf. interne]"))
+    assert result.status is EmailStatus.DRAFT_READY and len(client.messages.calls) == 3
+
+
+def test_reminder_reply_is_journaled(tmp_path):
+    source_dir = tmp_path / "inbox"
+    source_dir.mkdir()
+    (source_dir / "a.eml").write_bytes(build_eml(subject="Re: Rappel [Réf. R-00001]"))
+    store = EmailStore(connect())
+    results = process_inbox(FolderSource(source_dir, tmp_path / "drafts"), store, pipeline(FakeClient([]), tmp_path))
+    assert results[0].status is EmailStatus.TO_IGNORE
+    entry = store.list_log()[0]
+    assert entry["detail"]["note"] == "Réponse à une relance : traitée par agent-relances"

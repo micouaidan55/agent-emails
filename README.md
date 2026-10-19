@@ -99,6 +99,10 @@ Le tri d'emails est une tâche **bien définie** : l'enchaînement des étapes e
 
 Le même principe que dans l'agent de factures. Du code testé repère les signaux objectifs : domaine qui imite un client ou un fournisseur connu (`hoteI-canuts.fr`), lien dont le texte affiche une banque mais qui mène ailleurs, pièce jointe exécutable déguisée, adresse de réponse différente, messagerie gratuite pour une « direction », IBAN ou changement de coordonnées bancaires. Le modèle, dans l'appel de tri existant (aucun coût supplémentaire), juge le contexte : urgence, confidentialité, demande de virement. Le code tranche : un signal fort, deux signaux faibles ou un risque élevé selon le modèle suffisent à bloquer l'email. Si l'API tombe, les signaux du code protègent toujours. Le tableau de bord suit le taux de fausses alertes : trop d'alertes, et plus personne ne les lit.
 
+### Réponses aux relances
+
+Les réponses à une relance d'[agent-relances](https://github.com/micouaidan55/agent-relances) (objet portant `[Réf. R-00042]` ou `[Réf. E-00007]`) sont laissées à cet agent : statut « À ignorer », aucun appel au modèle, aucun coût. Une fausse balise ne contourne rien : agent-relances applique son propre contrôle de fraude à chaque réponse, et un humain confirme toute action.
+
 ### Garde-fous
 
 - Le contenu des emails est traité comme une **donnée non fiable** : les instructions qu'il contient ne sont jamais suivies.
