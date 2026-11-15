@@ -10,6 +10,15 @@ Une PME reçoit chaque jour des demandes de devis, des réclamations, des factur
 
 *En 30 secondes : la boîte de réception arrive triée, avec les fraudes possibles en tête. Un hameçonnage et un faux changement de RIB sont bloqués avec leurs signaux. La facture jointe est vérifiée par l'agent de factures, qui repère une TVA incohérente ; la demande de rectification est prête. Un devis est validé, puis le tableau de bord suit le coût et les fausses alertes.*
 
+## Ce que j'ai fait en tant que product manager
+
+Projet personnel (septembre à octobre 2026), développé avec Claude Code : spécification avec des objectifs chiffrés avant la première ligne de code, arbitrages d'architecture et de modèles, évaluation.
+
+- **L'architecture la plus simple qui marche.** La tâche est bien définie : un pipeline piloté par le code est plus fiable, moins cher et mesurable étape par étape qu'un agent autonome.
+- **Le bon modèle au bon endroit, prouvé par la mesure.** Claude Haiku trie et extrait, Claude Sonnet rédige. La variante tout Sonnet était un peu meilleure en extraction, mais 45 % plus chère pour le même tri : j'ai gardé Haiku. Résultat : **1 centime** par email.
+- **Une fonction ajoutée en cours de route, avec ses objectifs.** La fraude au faux RIB est l'arnaque la plus courante en PME. J'ai fait amender la spécification, ajouté 6 fraudes au jeu d'évaluation et fixé deux objectifs : 100 % de fraudes détectées, au plus une fausse alerte.
+- **Des règles explicables et le jugement du modèle.** Le code vérifie les signaux objectifs (domaine sosie, lien trompeur), le modèle juge le contexte, le code tranche. Sur 48 emails : **6 fraudes sur 6** arrêtées, dont 2 que seul le modèle pouvait repérer, et **1 seule fausse alerte** ; **97,6 %** de tri correct. 195 tests automatisés.
+
 ## Ce que fait l'agent
 
 1. **Trie** chaque email : demande de devis, réclamation, facture, rendez-vous, information ou prospection, avec un niveau d'urgence et une explication.
