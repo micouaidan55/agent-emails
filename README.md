@@ -10,6 +10,10 @@ Une PME reçoit chaque jour des demandes de devis, des réclamations, des factur
 
 *En 30 secondes : la boîte de réception arrive triée, avec les fraudes possibles en tête. Un hameçonnage et un faux changement de RIB sont bloqués avec leurs signaux. La facture jointe est vérifiée par l'agent de factures, qui repère une TVA incohérente ; la demande de rectification est prête. Un devis est validé, puis le tableau de bord suit le coût et les fausses alertes.*
 
+| Un faux RIB bloqué | La facture jointe vérifiée | Coût et fausses alertes suivis |
+|:---:|:---:|:---:|
+| <img src="docs/captures/fraude_faux_rib.jpg" width="290" alt="Email de faux fournisseur bloqué avec ses signaux de fraude"> | <img src="docs/captures/facture_verifiee.jpg" width="290" alt="Facture jointe vérifiée par agent-factures : TVA incohérente"> | <img src="docs/captures/tableau_de_bord.jpg" width="290" alt="Tableau de bord : coût par email, fraudes bloquées, fausses alertes"> |
+
 ## Ce que j'ai fait en tant que product manager
 
 Projet personnel (septembre à octobre 2026), développé avec Claude Code : spécification avec des objectifs chiffrés avant la première ligne de code, arbitrages d'architecture et de modèles, évaluation.
